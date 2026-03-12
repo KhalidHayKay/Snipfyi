@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"snipfyi/service"
@@ -34,7 +33,7 @@ func Stats(w http.ResponseWriter, r *http.Request) {
 	stat, err := service.Retrieve(code)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		Error(w, http.StatusNotFound, "Not found")
 		return
 	}

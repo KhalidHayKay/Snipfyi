@@ -9,14 +9,14 @@ import (
 
 func main() {
 
-	envErr := config.LoadEnv()
-	if envErr != nil {
-		log.Fatal(envErr)
+	err := config.LoadEnv()
+	if err != nil {
+		log.Println(err)
 	}
 
-	dbErr := config.InitDB()
-	if dbErr != nil {
-		log.Fatal(dbErr)
+	err = config.InitDB()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	fs := http.FileServer(http.Dir("./static"))

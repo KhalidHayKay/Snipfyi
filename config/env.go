@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -22,6 +23,11 @@ func LoadEnv() error {
 	Env = &EnvType{
 		AppUrl: os.Getenv("APP_URL"),
 		DbUrl:  os.Getenv("DB_URL"),
+	}
+
+	if Env.AppUrl == "" || Env.DbUrl == "" {
+		return errors.New("APP_URL or DB_URL not set")
+
 	}
 
 	return nil
