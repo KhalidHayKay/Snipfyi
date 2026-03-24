@@ -1,34 +1,34 @@
 package config
 
 import (
-	"database/sql"
+	"context"
 
-	_ "modernc.org/sqlite"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *sql.DB
+var DB *pgxpool.Pool
 
 func InitDB() error {
+	ctx := context.Background()
 
-	db, err := sql.Open("sqlite", Env.DbUrl)
+	db, err := pgxpool.New(ctx, Env.DbUrl)
 	if err != nil {
 		return err
 	}
 
-	pingErr := db.Ping()
-	if pingErr != nil {
-		return pingErr
+	err = db.Ping(ctx)
+	if err != nil {
+		return err
 	}
 
-	db.SetMaxOpenConns(1)
-	_, err = db.Exec(`
+	_, err = db.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS urls (
-			id       INTEGER PRIMARY KEY AUTOINCREMENT,
+			id SERIAL PRIMARY KEY,
 			original TEXT UNIQUE NOT NULL,
-			short    TEXT UNIQUE NOT NULL,
-			visited  INTEGER DEFAULT 0,
-			created  DATETIME DEFAULT CURRENT_TIMESTAMP,
-			last_visited DATETIME
+			short TEXT UNIQUE NOT NULL,
+			visited INTEGER DEFAULT 0,
+			created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			last_visited TIMESTAMP
 		);
 	`)
 	if err != nil {
@@ -36,6 +36,5 @@ func InitDB() error {
 	}
 
 	DB = db
-
 	return nil
 }

@@ -5,6 +5,6 @@
 .idea
 .vscode
 .git
-docker
+/docker/storage
 /storage/*.sqlite
 /storage/*.db

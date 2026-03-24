@@ -1,15 +1,19 @@
 package service
 
 import (
+	"context"
 	"smply/config"
 	"smply/model"
 )
+
+var pgCtx = context.Background()
 
 func GetByShort(short string) (model.Url, error) {
 	var url model.Url
 
 	err := config.DB.QueryRow(
-		`SELECT id, original, short FROM urls WHERE short = ?`,
+		pgCtx,
+		`SELECT id, original, short FROM urls WHERE short = $1`,
 		short).Scan(
 		&url.Id,
 		&url.Original,
@@ -28,7 +32,8 @@ func GetByOriginal(originalUrl string) (model.Url, error) {
 	var url model.Url
 
 	err := config.DB.QueryRow(
-		`SELECT id, original, short FROM urls WHERE original = ?`,
+		pgCtx,
+		`SELECT id, original, short FROM urls WHERE original = $1`,
 		originalUrl).Scan(
 		&url.Id,
 		&url.Original,

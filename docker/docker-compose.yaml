@@ -1,16 +1,17 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../
+      dockerfile: docker/Dockerfile.dev
     image: smply-app
     container_name: smply-app
     restart: unless-stopped
-    working_dir: /var/www/
+    working_dir: /app/
     volumes:
-      - ../:/var/www
+      - ../:/app
+      - go-module-cache:/root/go/pkg/mod
     ports:
       - "8000:8000"
   db:
@@ -18,8 +19,14 @@ services:
     container_name: smply-db
     restart: unless-stopped
     environment:
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: root
+      POSTGRES_DB: smply
     ports:
       - "5432:5432"
     volumes:
-      - storage/pgsql:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+  go-module-cache:

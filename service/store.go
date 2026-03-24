@@ -4,7 +4,6 @@ import (
 	"smply/config"
 	"smply/model"
 	"smply/utils"
-	"time"
 )
 
 func StoreUrl(url string, short string) (model.Url, error) {
@@ -14,27 +13,24 @@ func StoreUrl(url string, short string) (model.Url, error) {
 		return saved, nil
 	}
 
-	tx, err := config.DB.Begin()
+	tx, err := config.DB.Begin(pgCtx)
 	if err != nil {
 		return model.Url{}, err
 	}
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			tx.Rollback(pgCtx)
 		}
 	}()
 
-	res, err := tx.Exec(
-		`INSERT INTO urls (original, short) VALUES (?, ?)`,
+	var id int64
+	err = tx.QueryRow(
+		pgCtx,
+		`INSERT INTO urls (original, short) VALUES ($1, $2) RETURNING id`,
 		url,
-		time.Now().Unix(),
-	)
-	if err != nil {
-		return model.Url{}, err
-	}
-
-	id, err := res.LastInsertId()
+		short,
+	).Scan(&id)
 	if err != nil {
 		return model.Url{}, err
 	}
@@ -43,16 +39,17 @@ func StoreUrl(url string, short string) (model.Url, error) {
 		short = utils.EncodeWithPadding(id)
 	}
 
-	_, err = tx.Exec(`
-		UPDATE urls
-		SET short = ?
-		WHERE id = ?
-	`, short, id)
+	_, err = tx.Exec(
+		pgCtx,
+		`UPDATE urls SET short = $1 WHERE id = $2`,
+		short,
+		id,
+	)
 	if err != nil {
 		return model.Url{}, err
 	}
 
-	if err = tx.Commit(); err != nil {
+	if err = tx.Commit(pgCtx); err != nil {
 		return model.Url{}, err
 	}
 
