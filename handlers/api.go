@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"snipfyi/service"
-	"snipfyi/utils"
+	"smply/service"
+	"smply/utils"
 	"strings"
 
 	"modernc.org/sqlite"

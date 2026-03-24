@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: smply-app
+    container_name: smply-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ../:/var/www
+    ports:
+      - "8000:8000"
+  db:
+    image: postgres:16
+    container_name: smply-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - storage/pgsql:/var/lib/postgresql/data

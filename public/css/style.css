@@ -1,5 +1,5 @@
 /* ============================================
-   snip.fyi — Personal Project
+   smply.cc — Personal Project
    Font: Instrument Serif (display) + Inter (body)
    ============================================ */
 
@@ -144,7 +144,6 @@ input {
 .nav-logo {
 	display: flex;
 	align-items: center;
-	gap: 7px;
 	font-size: 16px;
 	font-weight: 600;
 	color: var(--ink);
@@ -153,6 +152,7 @@ input {
 .logo-mark {
 	width: 27px;
 	height: 27px;
+	margin-right: 7px;
 	background: var(--ink);
 	border-radius: 7px;
 	display: flex;

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"snipfyi/config"
-	"snipfyi/model"
+	"smply/config"
+	"smply/model"
 	"time"
 )
 

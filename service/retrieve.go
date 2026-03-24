@@ -1,8 +1,8 @@
 package service
 
 import (
-	"snipfyi/config"
-	"snipfyi/model"
+	"smply/config"
+	"smply/model"
 )
 
 func GetByShort(short string) (model.Url, error) {

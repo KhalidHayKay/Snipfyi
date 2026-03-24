@@ -2,7 +2,7 @@ package model
 
 import (
 	"fmt"
-	"snipfyi/config"
+	"smply/config"
 	"time"
 )
 

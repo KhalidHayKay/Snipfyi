@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"snipfyi/service"
-	"snipfyi/views"
+	"smply/service"
+	"smply/views"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
+	data := map[string]string{
 		"Title": "Home",
 		"Page":  "home",
 	}

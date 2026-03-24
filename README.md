@@ -1,1 +1,1 @@
-# SNIPFYI - Url shortener
+# SMPLY - Url shortener
