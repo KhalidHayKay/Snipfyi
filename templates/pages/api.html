@@ -1,0 +1,358 @@
+{{define "content"}}
+
+<section class="api-page">
+	<div class="container">
+		<!-- ── Page header ── -->
+		<div class="api-page-header">
+			<div class="page-kicker">Developer</div>
+			<h1 class="page-title">API <em>reference</em></h1>
+			<p class="page-sub">
+				Programmatic access to link shortening, redirect, and stats. Request a key
+				below to get started.
+			</p>
+		</div>
+
+		<!-- ── Two-column body ── -->
+		<div class="api-body">
+			<!-- LEFT: request form -->
+			<aside class="api-sidebar">
+				<div class="api-sidebar-sticky">
+					<div class="api-sidebar-heading">Get API access</div>
+					<p class="api-sidebar-sub">
+						Enter your email to receive a secure link to generate your key.
+					</p>
+
+					<div class="form-card" id="api-request-card">
+						<form id="api-key-form">
+							<div class="field">
+								<label for="api-email">Email address</label>
+								<input
+									id="api-email"
+									type="email"
+									name="email"
+									placeholder="you@example.com"
+									required
+									autocomplete="email"
+								/>
+							</div>
+							<button
+								type="submit"
+								class="btn btn-primary"
+								style="width: 100%; justify-content: center"
+								id="api-submit-btn"
+							>
+								Request key
+								<svg
+									width="14"
+									height="14"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5"
+									stroke-linecap="round"
+								>
+									<line x1="5" y1="12" x2="19" y2="12" />
+									<polyline points="12 5 19 12 12 19" />
+								</svg>
+							</button>
+						</form>
+
+						<div class="api-success" id="api-success" style="display: none">
+							<div class="api-success-icon">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5"
+									stroke-linecap="round"
+								>
+									<path d="M20 6L9 17l-5-5" />
+								</svg>
+							</div>
+							<div>
+								<div class="api-success-title">Check your inbox</div>
+								<div class="api-success-body">
+									Sent to <strong id="api-sent-to"></strong>. Follow the link to generate
+									your key.
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- key display — shown after email flow -->
+					<div class="api-key-card" id="api-key-card" style="display: none">
+						<div class="api-key-header">
+							<span class="api-key-label">Your API key</span>
+							<span class="api-key-warning">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+								>
+									<path
+										d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+									/>
+									<line x1="12" y1="9" x2="12" y2="13" />
+									<line x1="12" y1="17" x2="12.01" y2="17" />
+								</svg>
+								Shown once
+							</span>
+						</div>
+						<div class="api-key-display">
+							<code id="api-key-value">sk_live_1234567890abcdef</code>
+							<button class="api-key-copy" id="api-copy-btn" onclick="copyApiKey()">
+								<svg
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+								>
+									<rect x="9" y="9" width="13" height="13" rx="2" />
+									<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+								</svg>
+								Copy
+							</button>
+						</div>
+						<p class="api-key-note">
+							Store this key securely — it won't be shown again.
+						</p>
+					</div>
+
+					<!-- dev-only toggle, remove in prod -->
+					<button class="api-demo-toggle" onclick="toggleKeyDemo()" id="demo-toggle">
+						Preview key state
+					</button>
+				</div>
+			</aside>
+
+			<!-- RIGHT: documentation -->
+			<main class="api-docs">
+				<!-- shared headers note -->
+				<div class="api-base-note">
+					<div class="api-base-row">
+						<span class="api-base-label">Base URL</span>
+						<code>https://snip.fyi/api/v1</code>
+					</div>
+					<div class="api-base-row">
+						<span class="api-base-label">Auth header</span>
+						<code>Authorization: Bearer &lt;YOUR_API_KEY&gt;</code>
+					</div>
+				</div>
+
+				<!-- ── Endpoint 1: Shorten ── -->
+				<div class="api-doc-block">
+					<div class="api-endpoint-bar">
+						<span class="api-method post">POST</span>
+						<code class="api-path">/shorten</code>
+						<span class="api-endpoint-title">Shorten a URL</span>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">Request body</div>
+						<div class="api-code-block">
+							<div class="api-code-bar">
+								<span>json</span>
+								<button class="api-code-copy" onclick="copyCode(this, 'shorten-req')">
+									Copy
+								</button>
+							</div>
+							<pre id="shorten-req">
+{
+  "url": "https://example.com/very/long/path"
+}</pre
+							>
+						</div>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">
+							Response <span class="api-status ok">200</span>
+						</div>
+						<div class="api-code-block">
+							<div class="api-code-bar">
+								<span>json</span>
+								<button class="api-code-copy" onclick="copyCode(this, 'shorten-res')">
+									Copy
+								</button>
+							</div>
+							<pre id="shorten-res">
+{
+  "short_url": "https://snip.fyi/abc123",
+  "code":      "abc123"
+}</pre
+							>
+						</div>
+					</div>
+				</div>
+
+				<!-- ── Endpoint 2: Stats ── -->
+				<div class="api-doc-block">
+					<div class="api-endpoint-bar">
+						<span class="api-method get">GET</span>
+						<code class="api-path">/stats/<span class="api-param">{code}</span></code>
+						<span class="api-endpoint-title">Get link stats</span>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">Path parameter</div>
+						<div class="api-param-table">
+							<div class="api-param-row">
+								<code class="api-param-name">code</code>
+								<span class="api-param-type">string</span>
+								<span class="api-param-desc"
+									>The short code returned from <code>/shorten</code></span
+								>
+							</div>
+						</div>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">
+							Response <span class="api-status ok">200</span>
+						</div>
+						<div class="api-code-block">
+							<div class="api-code-bar">
+								<span>json</span>
+								<button class="api-code-copy" onclick="copyCode(this, 'stats-res')">
+									Copy
+								</button>
+							</div>
+							<pre id="stats-res">
+{
+  "short":        "https://snip.fyi/abc123",
+  "original":     "https://example.com/very/long/path",
+  "visited":      142,
+  "created":      "2025-01-15T14:30:00Z",
+  "last_visited": "2025-03-24T09:12:00Z"
+}</pre
+							>
+						</div>
+					</div>
+				</div>
+
+				<!-- ── Endpoint 3: Redirect ── -->
+				<div class="api-doc-block">
+					<div class="api-endpoint-bar">
+						<span class="api-method get">GET</span>
+						<code class="api-path">/<span class="api-param">{code}</span></code>
+						<span class="api-endpoint-title">Redirect to original URL</span>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">Behaviour</div>
+						<p class="api-prose">
+							Returns a <code class="api-inline-code">302 Found</code> redirect to the
+							original URL. Increments the visit counter and records
+							<code class="api-inline-code">last_visited</code>. No request body
+							required.
+						</p>
+					</div>
+
+					<div class="api-doc-group">
+						<div class="api-doc-group-label">
+							Response <span class="api-status redirect">302</span>
+						</div>
+						<div class="api-code-block">
+							<div class="api-code-bar">
+								<span>http</span>
+								<button class="api-code-copy" onclick="copyCode(this, 'redirect-res')">
+									Copy
+								</button>
+							</div>
+							<pre id="redirect-res">
+HTTP/1.1 302 Found
+Location: https://example.com/very/long/path</pre
+							>
+						</div>
+					</div>
+				</div>
+
+				<!-- Errors + rate limit note -->
+				<div class="api-footer-note">
+					<svg
+						width="13"
+						height="13"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+					>
+						<circle cx="12" cy="12" r="10" />
+						<line x1="12" y1="8" x2="12" y2="12" />
+						<line x1="12" y1="16" x2="12.01" y2="16" />
+					</svg>
+					<p>
+						All endpoints require a valid <code>Authorization</code> header and are
+						rate-limited per API key. Unauthorized requests return <code>401</code>.
+						Rate-limited requests return <code>429</code>.
+					</p>
+				</div>
+			</main>
+		</div>
+	</div>
+</section>
+
+<script>
+	(function () {
+		var keyVisible = false;
+
+		document
+			.getElementById('api-key-form')
+			.addEventListener('submit', function (e) {
+				e.preventDefault();
+				var email = document.getElementById('api-email').value.trim();
+				if (!email) return;
+				var btn = document.getElementById('api-submit-btn');
+				btn.textContent = 'Sending…';
+				btn.disabled = true;
+				setTimeout(function () {
+					document.getElementById('api-email').closest('.field').style.display =
+						'none';
+					btn.style.display = 'none';
+					document.getElementById('api-sent-to').textContent = email;
+					document.getElementById('api-success').style.display = 'flex';
+				}, 1100);
+			});
+
+		window.toggleKeyDemo = function () {
+			keyVisible = !keyVisible;
+			document.getElementById('api-key-card').style.display = keyVisible
+				? 'block'
+				: 'none';
+			document.getElementById('demo-toggle').textContent = keyVisible
+				? 'Hide key state'
+				: 'Preview key state';
+		};
+
+		window.copyApiKey = function () {
+			var key = document.getElementById('api-key-value').textContent;
+			navigator.clipboard.writeText(key).then(function () {
+				var btn = document.getElementById('api-copy-btn');
+				var prev = btn.innerHTML;
+				btn.textContent = 'Copied!';
+				setTimeout(function () {
+					btn.innerHTML = prev;
+				}, 2000);
+			});
+		};
+
+		window.copyCode = function (btn, id) {
+			var text = document.getElementById(id).textContent;
+			navigator.clipboard.writeText(text).then(function () {
+				var prev = btn.textContent;
+				btn.textContent = 'Copied!';
+				setTimeout(function () {
+					btn.textContent = prev;
+				}, 2000);
+			});
+		};
+	})();
+</script>
+
+{{end}}

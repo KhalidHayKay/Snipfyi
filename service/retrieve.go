@@ -6,13 +6,11 @@ import (
 	"smply/model"
 )
 
-var pgCtx = context.Background()
-
-func GetByShort(short string) (model.Url, error) {
+func GetByShort(ctx context.Context, short string) (model.Url, error) {
 	var url model.Url
 
 	err := config.DB.QueryRow(
-		pgCtx,
+		ctx,
 		`SELECT id, original, short FROM urls WHERE short = $1`,
 		short).Scan(
 		&url.Id,
@@ -28,11 +26,11 @@ func GetByShort(short string) (model.Url, error) {
 	return url, nil
 }
 
-func GetByOriginal(originalUrl string) (model.Url, error) {
+func GetByOriginal(ctx context.Context, originalUrl string) (model.Url, error) {
 	var url model.Url
 
 	err := config.DB.QueryRow(
-		pgCtx,
+		ctx,
 		`SELECT id, original, short FROM urls WHERE original = $1`,
 		originalUrl).Scan(
 		&url.Id,

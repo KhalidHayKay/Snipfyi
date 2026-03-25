@@ -23,13 +23,14 @@ func main() {
 	// Page routes
 	mux.HandleFunc("GET /", handlers.Home)
 	mux.HandleFunc("GET /shorten", handlers.ShortenPage)
+	mux.HandleFunc("GET /api", handlers.ApiPage)
 	mux.HandleFunc("GET /stats/{code}", handlers.Stats)
 	mux.HandleFunc("GET /{code}", handlers.Redirect)
 
 	// API routes
-	mux.HandleFunc("POST /api/shorten", handlers.Shorten)
-	mux.HandleFunc("GET /api/stats/{code}", handlers.StatsApi)
-	mux.HandleFunc("GET /api/{code}", handlers.RedirectApi)
+	mux.HandleFunc("POST /api/v1/shorten", handlers.Shorten)
+	mux.HandleFunc("GET /api/v1/stats/{code}", handlers.StatsApi)
+	mux.HandleFunc("GET /api/v1/{code}", handlers.RedirectApi)
 
 	port := config.Env.AppPort
 

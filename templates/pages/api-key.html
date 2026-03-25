@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<title>Your API Key — snip.fyi</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			:root {
+				--ink: #0d0f12;
+				--ink2: #1a1d24;
+				--blue: #2563eb;
+				--warm: #fafaf9;
+				--grey1: #f4f4f5;
+				--grey2: #e4e4e7;
+				--grey3: #a1a1aa;
+				--grey4: #52525b;
+				--success: #16a34a;
+				--danger: #dc2626;
+				--font-serif: 'Instrument Serif', Georgia, serif;
+				--font-sans: 'Inter', system-ui, sans-serif;
+				--radius: 10px;
+				--radius-lg: 16px;
+				--shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+			}
+			html,
+			body {
+				height: 100%;
+				font-family: var(--font-sans);
+				background: var(--warm);
+				color: var(--ink);
+				-webkit-font-smoothing: antialiased;
+			}
+			body {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				padding: 32px 20px;
+			}
+
+			.card {
+				width: 100%;
+				max-width: 480px;
+				background: #fff;
+				border: 1px solid var(--grey2);
+				border-radius: 20px;
+				box-shadow: var(--shadow);
+				overflow: hidden;
+			}
+
+			.card-top {
+				padding: 32px 32px 24px;
+				border-bottom: 1px solid var(--grey2);
+			}
+			.card-wordmark {
+				font-family: var(--font-sans);
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--ink);
+				letter-spacing: -0.03em;
+				margin-bottom: 24px;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.card-wordmark .mark {
+				width: 24px;
+				height: 24px;
+				background: var(--ink);
+				border-radius: 6px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.card-wordmark .mark svg {
+				width: 13px;
+				height: 13px;
+				stroke: white;
+				fill: none;
+				stroke-width: 2.3;
+			}
+			.card-wordmark .tld {
+				color: var(--blue);
+			}
+
+			.card-title {
+				font-family: var(--font-serif);
+				font-size: 28px;
+				font-weight: 400;
+				letter-spacing: -0.02em;
+				color: var(--ink);
+				line-height: 1.1;
+				margin-bottom: 8px;
+			}
+			.card-title em {
+				font-style: italic;
+				color: var(--blue);
+			}
+			.card-sub {
+				font-size: 14px;
+				color: var(--grey4);
+				line-height: 1.6;
+			}
+
+			.card-body {
+				padding: 24px 32px 28px;
+			}
+
+			/* key display */
+			.key-label {
+				font-size: 11px;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 1.2px;
+				color: var(--grey3);
+				margin-bottom: 8px;
+			}
+			.key-box {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				background: var(--grey1);
+				border: 1px solid var(--grey2);
+				border-radius: var(--radius);
+				padding: 11px 14px;
+				margin-bottom: 12px;
+			}
+			.key-box code {
+				flex: 1;
+				font-family: monospace;
+				font-size: 14px;
+				color: var(--ink);
+				letter-spacing: 0.02em;
+				word-break: break-all;
+			}
+			.key-copy {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				font-family: var(--font-sans);
+				font-size: 12px;
+				font-weight: 500;
+				color: var(--grey4);
+				background: #fff;
+				border: 1px solid var(--grey2);
+				border-radius: 7px;
+				padding: 5px 10px;
+				cursor: pointer;
+				transition: 0.15s;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+			.key-copy:hover {
+				color: var(--ink);
+				border-color: #a1a1aa;
+			}
+			.key-copy svg {
+				flex-shrink: 0;
+			}
+
+			.key-warning {
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+				background: rgba(251, 191, 36, 0.08);
+				border: 1px solid rgba(251, 191, 36, 0.25);
+				border-radius: var(--radius);
+				padding: 11px 13px;
+				font-size: 13px;
+				color: #92400e;
+				line-height: 1.55;
+				margin-bottom: 20px;
+			}
+			.key-warning svg {
+				width: 14px;
+				height: 14px;
+				stroke: #d97706;
+				flex-shrink: 0;
+				margin-top: 1px;
+			}
+
+			/* copied state */
+			.key-copied {
+				display: none;
+				align-items: center;
+				gap: 7px;
+				background: rgba(22, 163, 74, 0.07);
+				border: 1px solid rgba(22, 163, 74, 0.2);
+				border-radius: var(--radius);
+				padding: 10px 13px;
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--success);
+				margin-bottom: 12px;
+				animation: fadeUp 0.2s ease;
+			}
+			.key-copied.show {
+				display: flex;
+			}
+			.key-copied svg {
+				width: 13px;
+				height: 13px;
+				stroke: var(--success);
+				flex-shrink: 0;
+			}
+
+			.card-action {
+				display: block;
+				width: 100%;
+				text-align: center;
+				padding: 10px;
+				border-radius: var(--radius);
+				background: var(--ink);
+				color: #fff;
+				font-family: var(--font-sans);
+				font-size: 14px;
+				font-weight: 500;
+				text-decoration: none;
+				letter-spacing: -0.01em;
+				transition: 0.15s;
+				cursor: pointer;
+				border: none;
+			}
+			.card-action:hover {
+				background: #1a1d24;
+			}
+
+			.card-footer {
+				padding: 16px 32px;
+				border-top: 1px solid var(--grey2);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.card-footer-note {
+				font-size: 12px;
+				color: var(--grey3);
+			}
+			.card-footer a {
+				font-size: 12px;
+				color: var(--grey3);
+				text-decoration: none;
+			}
+			.card-footer a:hover {
+				color: var(--ink);
+			}
+
+			@keyframes fadeUp {
+				from {
+					opacity: 0;
+					transform: translateY(4px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<div class="card-top">
+				<div class="card-wordmark">
+					<div class="mark">
+						<svg viewBox="0 0 24 24">
+							<path
+								d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"
+							/>
+							<line x1="8" y1="12" x2="16" y2="12" />
+						</svg>
+					</div>
+					snip<span class="tld">.fyi</span>
+				</div>
+				<h1 class="card-title">Your API <em>key</em></h1>
+				<p class="card-sub">
+					Copy it now — this page will not show the key again once you leave.
+				</p>
+			</div>
+
+			<div class="card-body">
+				<div class="key-label">API key</div>
+
+				<div class="key-box" id="key-box">
+					<!-- In production: render {{ .ApiKey }} here -->
+					<code id="key-value">sk_live_1234567890abcdef</code>
+					<button class="key-copy" onclick="doCopy()">
+						<svg
+							width="12"
+							height="12"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+						>
+							<rect x="9" y="9" width="13" height="13" rx="2" />
+							<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+						</svg>
+						Copy
+					</button>
+				</div>
+
+				<div class="key-copied" id="key-copied">
+					<svg viewBox="0 0 24 24" fill="none">
+						<path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round" />
+					</svg>
+					Copied to clipboard
+				</div>
+
+				<div class="key-warning">
+					<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round">
+						<path
+							d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+							stroke-width="2"
+						/>
+						<line x1="12" y1="9" x2="12" y2="13" stroke-width="2" />
+						<line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2" />
+					</svg>
+					This key will not be shown again after you leave this page. Store it in a
+					safe place — a password manager or environment variable.
+				</div>
+
+				<a href="/api" class="card-action">Go to API docs</a>
+			</div>
+
+			<div class="card-footer">
+				<span class="card-footer-note">snip.fyi API v1</span>
+				<a href="/">Back to home</a>
+			</div>
+		</div>
+
+		<script>
+			function doCopy() {
+				var key = document.getElementById('key-value').textContent;
+				navigator.clipboard.writeText(key).then(function () {
+					var copied = document.getElementById('key-copied');
+					copied.classList.add('show');
+					setTimeout(function () {
+						copied.classList.remove('show');
+					}, 3000);
+				});
+			}
+
+			// Warn before leaving if key hasn't been copied
+			var keyCopied = false;
+			document.querySelector('.key-copy').addEventListener('click', function () {
+				keyCopied = true;
+			});
+			window.addEventListener('beforeunload', function (e) {
+				if (!keyCopied) {
+					e.preventDefault();
+					e.returnValue = '';
+				}
+			});
+			// Don't block on the "Go to API docs" link since they chose to leave
+			document
+				.querySelector('.card-action')
+				.addEventListener('click', function () {
+					keyCopied = true;
+				});
+		</script>
+	</body>
+</html>

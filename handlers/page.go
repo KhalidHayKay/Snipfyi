@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net/http"
 	"smply/service"
 	"smply/views"
+	"time"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -26,10 +28,17 @@ func ShortenPage(w http.ResponseWriter, r *http.Request) {
 	views.Render(w, "shorten.html", data)
 }
 
+func ApiPage(w http.ResponseWriter, r *http.Request) {
+	views.Render(w, "api.html", map[string]any{
+		"Title": "API",
+		"Page":  "api",
+	})
+}
+
 func Redirect(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
-	url, err := service.GetByShort(code)
+	url, err := service.GetByShort(r.Context(), code)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -42,7 +51,10 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		err := service.RunStats(url.Id)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		err := service.RunStats(ctx, url.Id)
 
 		if err != nil {
 			log.Println(err)
@@ -55,7 +67,7 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 func Stats(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
-	stat, err := service.GetStats(code)
+	stat, err := service.GetStats(r.Context(), code)
 
 	if err != nil {
 		log.Println(err)

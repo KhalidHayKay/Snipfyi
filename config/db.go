@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -9,7 +10,8 @@ import (
 var DB *pgxpool.Pool
 
 func InitDB() error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	db, err := pgxpool.New(ctx, Env.DbUrl)
 	if err != nil {

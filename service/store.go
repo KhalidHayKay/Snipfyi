@@ -1,32 +1,33 @@
 package service
 
 import (
+	"context"
 	"smply/config"
 	"smply/model"
 	"smply/utils"
 )
 
-func StoreUrl(url string, short string) (model.Url, error) {
-	saved, _ := GetByOriginal(url)
+func StoreUrl(ctx context.Context, url string, short string) (model.Url, error) {
+	saved, _ := GetByOriginal(ctx, url)
 
 	if (saved != model.Url{}) {
 		return saved, nil
 	}
 
-	tx, err := config.DB.Begin(pgCtx)
+	tx, err := config.DB.Begin(ctx)
 	if err != nil {
 		return model.Url{}, err
 	}
 
 	defer func() {
 		if err != nil {
-			tx.Rollback(pgCtx)
+			tx.Rollback(ctx)
 		}
 	}()
 
 	var id int64
 	err = tx.QueryRow(
-		pgCtx,
+		ctx,
 		`INSERT INTO urls (original, short) VALUES ($1, $2) RETURNING id`,
 		url,
 		short,
@@ -40,7 +41,7 @@ func StoreUrl(url string, short string) (model.Url, error) {
 	}
 
 	_, err = tx.Exec(
-		pgCtx,
+		ctx,
 		`UPDATE urls SET short = $1 WHERE id = $2`,
 		short,
 		id,
@@ -49,7 +50,7 @@ func StoreUrl(url string, short string) (model.Url, error) {
 		return model.Url{}, err
 	}
 
-	if err = tx.Commit(pgCtx); err != nil {
+	if err = tx.Commit(ctx); err != nil {
 		return model.Url{}, err
 	}
 

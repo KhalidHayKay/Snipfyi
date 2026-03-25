@@ -8,13 +8,15 @@ import (
 	"smply/utils"
 	"strings"
 
-	"modernc.org/sqlite"
-	sqlite3 "modernc.org/sqlite/lib"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func Shorten(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
 	alias := r.FormValue("alias")
+
+	r.Context()
 
 	if url == "" {
 		Error(w, http.StatusUnprocessableEntity, "'url' is a required field")
@@ -26,14 +28,15 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := service.StoreUrl(url, alias)
+	result, err := service.StoreUrl(r.Context(), url, alias)
 	if err != nil {
 		log.Println(err)
 
-		var sqliteErr *sqlite.Error
-		if errors.As(err, &sqliteErr) && sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT_UNIQUE {
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
 			msg := "A record with this value already exists"
-			if strings.Contains(err.Error(), "urls.short") {
+			if pgErr.ConstraintName == "urls_short_key" || strings.Contains(pgErr.Message, "urls.short") {
 				msg = "This alias is already taken"
 			}
 			Error(w, http.StatusConflict, msg)
@@ -50,7 +53,7 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 func StatsApi(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
-	stat, err := service.GetStats(code)
+	stat, err := service.GetStats(r.Context(), code)
 
 	if err != nil {
 		log.Println(err)
@@ -64,7 +67,7 @@ func StatsApi(w http.ResponseWriter, r *http.Request) {
 func RedirectApi(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 
-	stat, err := service.GetByShort(code)
+	stat, err := service.GetByShort(r.Context(), code)
 
 	if err != nil {
 		log.Println(err)
