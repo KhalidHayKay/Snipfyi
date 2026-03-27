@@ -16,8 +16,6 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
 	alias := r.FormValue("alias")
 
-	r.Context()
-
 	if url == "" {
 		Error(w, http.StatusUnprocessableEntity, "'url' is a required field")
 		return

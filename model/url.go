@@ -21,3 +21,11 @@ func (u *Url) BuildUrls() {
 	u.Short = fmt.Sprintf("%s/%s", config.Env.AppUrl, code)
 	u.Stat = fmt.Sprintf("%s/stats/%s", config.Env.AppUrl, code)
 }
+
+type ClickEvent struct {
+	Id        int64     `json:"id"`
+	LinkId    int64     `json:"link_id"`
+	Timestamp time.Time `json:"timestamp"`
+	Referrer  string    `json:"referrer"`
+	UserAgent string    `json:"user_agent"`
+}

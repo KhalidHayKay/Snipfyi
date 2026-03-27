@@ -1,115 +1,113 @@
 {{define "content"}}
 
 <section class="shorten-page">
-  <div class="container">
+	<div class="container">
+		<div class="shorten-layout">
+			<!-- Left: heading + context -->
+			<div>
+				<div class="page-kicker">Shorten</div>
+				<h1 class="page-title">Advanced<br /><em>link options</em></h1>
+				<p class="page-sub">
+					Set a custom alias, then grab your short link. Once created, visit
+					<code class="code-badge">your-link/stats</code> to see click analytics.
+				</p>
 
-    <div class="shorten-layout">
+				<!-- Anatomy callout -->
+				<div class="steps-container">
+					<div class="steps-label">How it works</div>
 
-      <!-- Left: heading + context -->
-      <div>
-        <div class="page-kicker">Shorten</div>
-        <h1 class="page-title">
-          Advanced<br><em>link options</em>
-        </h1>
-        <p class="page-sub">
-          Set a custom alias, then grab your short link. Once created,
-          visit <code style="font-size:12px;background:var(--grey1);padding:1px 5px;border-radius:4px;border:1px solid var(--grey2)">your-link/stats</code> to see click analytics.
-        </p>
+					<div class="steps-list">
+						<div class="step-item">
+							<div class="step-number">1</div>
+							<div class="step-text">
+								<h4>Paste your URL</h4>
+								<p>Any valid URL works.</p>
+							</div>
+						</div>
+						<div class="step-item">
+							<div class="step-number">2</div>
+							<div class="step-text">
+								<h4>Set an alias <span class="text-subtle">(optional)</span></h4>
+								<p>Leave blank for a random code.</p>
+							</div>
+						</div>
+						<div class="step-item">
+							<div class="step-number accent">3</div>
+							<div class="step-text">
+								<h4>Track at <code class="code-badge code-badge-sm">/stats</code></h4>
+								<p>Every link gets a stats page automatically.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-        <!-- Anatomy callout -->
-        <div style="margin-top:36px;padding:20px;background:var(--white);border:1px solid var(--grey2);border-radius:var(--radius-lg);">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--grey3);margin-bottom:14px;">How it works</div>
+			<!-- Right: form + result -->
+			<div>
+				<div class="form-card">
+					<form id="shorten-form">
+						<div class="field">
+							<label for="long-url">Long URL</label>
+							<input
+								id="long-url"
+								type="url"
+								name="long_url"
+								placeholder="https://example.com/some/very/long/path?with=query&params=yes"
+								required
+								autocomplete="off"
+								spellcheck="false"
+							/>
+						</div>
 
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="width:22px;height:22px;background:var(--ink);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-                <span style="font-size:11px;font-weight:700;color:white;">1</span>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:500;color:var(--ink);">Paste your URL</div>
-                <div style="font-size:12px;color:var(--grey4);">Any valid URL works.</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="width:22px;height:22px;background:var(--ink);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-                <span style="font-size:11px;font-weight:700;color:white;">2</span>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:500;color:var(--ink);">Set an alias <span style="font-weight:400;color:var(--grey3)">(optional)</span></div>
-                <div style="font-size:12px;color:var(--grey4);">Leave blank for a random code.</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="width:22px;height:22px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-                <span style="font-size:11px;font-weight:700;color:white;">3</span>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:500;color:var(--ink);">Track at <code style="font-size:11px;background:var(--grey1);padding:1px 4px;border-radius:3px;border:1px solid var(--grey2)">/stats</code></div>
-                <div style="font-size:12px;color:var(--grey4);">Every link gets a stats page automatically.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+						<div class="field">
+							<label for="alias-input">
+								Custom alias <span class="opt">(optional)</span>
+							</label>
+							<div class="alias-wrap">
+								<div class="alias-pre">smply.cc/</div>
+								<input
+									id="alias-input"
+									type="text"
+									name="alias"
+									placeholder="my-link"
+									pattern="[a-zA-Z0-9\-_]+"
+									title="Letters, numbers, hyphens and underscores only"
+									autocomplete="off"
+									spellcheck="false"
+								/>
+							</div>
+							<div class="field-hint">
+								Letters, numbers, hyphens, underscores. Leave blank for a random code.
+							</div>
+						</div>
 
-      <!-- Right: form + result -->
-      <div>
-        <div class="form-card">
-          <form id="shorten-form">
+						<div class="form-sep"></div>
 
-            <div class="field">
-              <label for="long-url">Long URL</label>
-              <input
-                id="long-url"
-                type="url"
-                name="long_url"
-                placeholder="https://example.com/some/very/long/path?with=query&params=yes"
-                required
-                autocomplete="off"
-                spellcheck="false"
-              />
-            </div>
+						<button type="submit" class="btn btn-primary">
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+							>
+								<path
+									d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"
+								/>
+								<line x1="8" y1="12" x2="16" y2="12" />
+							</svg>
+							Shorten URL
+						</button>
+					</form>
+				</div>
 
-            <div class="field">
-              <label for="alias-input">
-                Custom alias <span class="opt">(optional)</span>
-              </label>
-              <div class="alias-wrap">
-                <div class="alias-pre">smply.cc/</div>
-                <input
-                  id="alias-input"
-                  type="text"
-                  name="alias"
-                  placeholder="my-link"
-                  pattern="[a-zA-Z0-9\-_]+"
-                  title="Letters, numbers, hyphens and underscores only"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
-              </div>
-              <div class="field-hint">Letters, numbers, hyphens, underscores. Leave blank for a random code.</div>
-            </div>
-
-            <div class="form-sep"></div>
-
-            <button type="submit" class="btn btn-primary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-              Shorten URL
-            </button>
-
-          </form>
-        </div>
-
-        <!-- Result appears here -->
-        <div id="shorten-result" class="shorten-result" style="margin-top:16px;"></div>
-
-      </div>
-
-    </div>
-  </div>
+				<!-- Result appears here -->
+				<div id="shorten-result" class="shorten-result mt-1"></div>
+			</div>
+		</div>
+	</div>
 </section>
 
 {{end}}

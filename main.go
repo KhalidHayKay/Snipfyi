@@ -27,10 +27,14 @@ func main() {
 	mux.HandleFunc("GET /stats/{code}", handlers.Stats)
 	mux.HandleFunc("GET /{code}", handlers.Redirect)
 
-	// API routes
+	// Private API routes
+	mux.HandleFunc("POST /api/key/request", handlers.RequestApiKey)
+	mux.HandleFunc("GET /key/activate", handlers.CreateApiKey)
+
+	//Public API routes
 	mux.HandleFunc("POST /api/v1/shorten", handlers.Shorten)
 	mux.HandleFunc("GET /api/v1/stats/{code}", handlers.StatsApi)
-	mux.HandleFunc("GET /api/v1/{code}", handlers.RedirectApi)
+	mux.HandleFunc("GET /api/v1/redirect/{code}", handlers.RedirectApi)
 
 	port := config.Env.AppPort
 

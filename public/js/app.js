@@ -237,8 +237,160 @@ function initAdvancedForm() {
 	});
 }
 
+// ── API Key Page ──
+function initApiKeyPage() {
+	const keyValueEl = document.getElementById('key-value');
+	const keyCopiedEl = document.getElementById('key-copied');
+	if (!keyValueEl) return;
+
+	window.doCopy = function () {
+		const key = keyValueEl.textContent;
+		navigator.clipboard
+			.writeText(key)
+			.then(() => {
+				if (keyCopiedEl) {
+					keyCopiedEl.classList.add('show');
+					setTimeout(() => {
+						keyCopiedEl.classList.remove('show');
+					}, 3000);
+				}
+				// Mark as copied for beforeunload
+				if (window.__keyCopied !== undefined) {
+					window.__keyCopied = true;
+				}
+			})
+			.catch((err) => {
+				console.error('Copy failed:', err);
+				showToast('Failed to copy', 'error');
+			});
+	};
+
+	// Track if key was copied before leave
+	window.__keyCopied = false;
+	const copyBtn = document.querySelector('.key-copy');
+	const cardAction = document.querySelector('.card-action');
+	if (copyBtn) {
+		copyBtn.addEventListener('click', () => {
+			window.__keyCopied = true;
+		});
+	}
+	window.addEventListener('beforeunload', (e) => {
+		if (window.__keyCopied === false) {
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	});
+	if (cardAction) {
+		cardAction.addEventListener('click', () => {
+			window.__keyCopied = true;
+		});
+	}
+}
+
+// ── API Page ──
+function initApiPage() {
+	const apiForm = document.getElementById('api-key-form');
+	if (!apiForm) return;
+
+	apiForm.addEventListener('submit', function (e) {
+		e.preventDefault();
+		const emailInput = document.getElementById('api-email');
+		const email = emailInput?.value.trim();
+		if (!email) return;
+		const btn = document.getElementById('api-submit-btn');
+		const prevText = btn.textContent;
+		btn.textContent = 'Sending…';
+		btn.disabled = true;
+		setTimeout(() => {
+			if (emailInput) emailInput.closest('.field').style.display = 'none';
+			btn.style.display = 'none';
+			const sentTo = document.getElementById('api-sent-to');
+			if (sentTo) sentTo.textContent = email;
+			const success = document.getElementById('api-success');
+			if (success) success.style.display = 'flex';
+		}, 1100);
+	});
+
+	window.toggleKeyDemo = function () {
+		const keyCard = document.getElementById('api-key-card');
+		const demoToggle = document.getElementById('demo-toggle');
+		if (!keyCard || !demoToggle) return;
+		const isVisible = keyCard.style.display === 'block';
+		keyCard.style.display = isVisible ? 'none' : 'block';
+		demoToggle.textContent = isVisible ? 'Preview key state' : 'Hide key state';
+	};
+
+	window.copyApiKey = function () {
+		const keyValue = document.getElementById('api-key-value');
+		const copyBtn = document.getElementById('api-copy-btn');
+		if (!keyValue) return;
+		const key = keyValue.textContent;
+		navigator.clipboard
+			.writeText(key)
+			.then(() => {
+				if (copyBtn) {
+					const prev = copyBtn.innerHTML;
+					copyBtn.textContent = 'Copied!';
+					setTimeout(() => {
+						copyBtn.innerHTML = prev;
+					}, 2000);
+				}
+			})
+			.catch((err) => {
+				console.error('Copy failed:', err);
+				showToast('Failed to copy', 'error');
+			});
+	};
+
+	window.copyCode = function (btn, id) {
+		const codeEl = document.getElementById(id);
+		if (!codeEl) return;
+		const text = codeEl.textContent;
+		navigator.clipboard
+			.writeText(text)
+			.then(() => {
+				const prev = btn.textContent;
+				btn.textContent = 'Copied!';
+				setTimeout(() => {
+					btn.textContent = prev;
+				}, 2000);
+			})
+			.catch((err) => {
+				console.error('Copy failed:', err);
+				showToast('Failed to copy', 'error');
+			});
+	};
+}
+
+// ── Stats Page ──
+function initStatsPage() {
+	const statsQr = document.getElementById('stats-qr');
+	if (!statsQr) return;
+
+	// Generate QR code for stats page short URL
+	if (typeof QRCode !== 'undefined') {
+		const shortUrl =
+			statsQr.closest('.stats-qr-box')?.parentElement?.textContent ||
+			document.querySelector('.stats-title em')?.textContent ||
+			'';
+		if (shortUrl) {
+			new QRCode(statsQr, {
+				text: shortUrl,
+				width: 120,
+				height: 120,
+				colorDark: '#0d0f12',
+				colorLight: '#ffffff',
+				correctLevel: QRCode.CorrectLevel.M,
+			});
+		}
+	}
+}
+
 // ── Boot ──
 document.addEventListener('DOMContentLoaded', () => {
 	initShortenForm('hero-form', 'hero-result');
 	initAdvancedForm();
+	initApiKeyPage();
+	initApiPage();
+	initStatsPage();
 });

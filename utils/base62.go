@@ -23,12 +23,10 @@ func Encode(num int64) string {
 
 func EncodeWithPadding(id int64) string {
 	base62 := Encode(id) // your existing Base62 encoder
-	if len(base62) >= 3 {
+	if len(base62) >= 2 {
 		return base62
 	}
 
-	// Add random padding characters from the charset
-	charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	for len(base62) < 3 {
 		randIndex := rand.Intn(len(charset))
 		base62 = base62 + string(charset[randIndex])

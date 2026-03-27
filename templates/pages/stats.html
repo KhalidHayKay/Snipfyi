@@ -55,24 +55,16 @@
 					<div class="stats-card-label">Last visited</div>
 					<div class="stats-card-value">
 						{{if not .Stats.LastVisited}}
-						<span style="color: var(--grey3); font-weight: 400">Never</span>
+						<span class="stats-card-empty">Never</span>
 						{{else}} {{ .Stats.LastVisited.Format "Jan 2, 2006" }}
-						<span
-							style="
-								display: block;
-								font-size: 12px;
-								font-weight: 400;
-								color: var(--grey3);
-								margin-top: 2px;
-							"
-						>
+						<span class="stats-card-time">
 							{{ .Stats.LastVisited.Format "3:04 PM" }}
 						</span>
 						{{end}}
 					</div>
 				</div>
 
-				<div class="stats-card" style="grid-column: 1 / -1">
+				<div class="stats-card stats-card-full">
 					<div class="stats-card-label">Original URL</div>
 					<div class="stats-card-value mono">
 						<a
@@ -117,21 +109,5 @@
 		</div>
 	</div>
 </section>
-
-<script>
-	// Generate QR for this link's short URL
-	document.addEventListener('DOMContentLoaded', function () {
-		if (typeof QRCode !== 'undefined') {
-			new QRCode(document.getElementById('stats-qr'), {
-				text: '{{ .Stats.Short }}',
-				width: 120,
-				height: 120,
-				colorDark: '#0d0f12',
-				colorLight: '#ffffff',
-				correctLevel: QRCode.CorrectLevel.M,
-			});
-		}
-	});
-</script>
 
 {{end}}

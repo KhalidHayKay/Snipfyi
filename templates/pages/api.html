@@ -37,8 +37,7 @@
 							</div>
 							<button
 								type="submit"
-								class="btn btn-primary"
-								style="width: 100%; justify-content: center"
+								class="btn btn-primary btn-full"
 								id="api-submit-btn"
 							>
 								Request key
@@ -297,62 +296,5 @@ Location: https://example.com/very/long/path</pre
 		</div>
 	</div>
 </section>
-
-<script>
-	(function () {
-		var keyVisible = false;
-
-		document
-			.getElementById('api-key-form')
-			.addEventListener('submit', function (e) {
-				e.preventDefault();
-				var email = document.getElementById('api-email').value.trim();
-				if (!email) return;
-				var btn = document.getElementById('api-submit-btn');
-				btn.textContent = 'Sending…';
-				btn.disabled = true;
-				setTimeout(function () {
-					document.getElementById('api-email').closest('.field').style.display =
-						'none';
-					btn.style.display = 'none';
-					document.getElementById('api-sent-to').textContent = email;
-					document.getElementById('api-success').style.display = 'flex';
-				}, 1100);
-			});
-
-		window.toggleKeyDemo = function () {
-			keyVisible = !keyVisible;
-			document.getElementById('api-key-card').style.display = keyVisible
-				? 'block'
-				: 'none';
-			document.getElementById('demo-toggle').textContent = keyVisible
-				? 'Hide key state'
-				: 'Preview key state';
-		};
-
-		window.copyApiKey = function () {
-			var key = document.getElementById('api-key-value').textContent;
-			navigator.clipboard.writeText(key).then(function () {
-				var btn = document.getElementById('api-copy-btn');
-				var prev = btn.innerHTML;
-				btn.textContent = 'Copied!';
-				setTimeout(function () {
-					btn.innerHTML = prev;
-				}, 2000);
-			});
-		};
-
-		window.copyCode = function (btn, id) {
-			var text = document.getElementById(id).textContent;
-			navigator.clipboard.writeText(text).then(function () {
-				var prev = btn.textContent;
-				btn.textContent = 'Copied!';
-				setTimeout(function () {
-					btn.textContent = prev;
-				}, 2000);
-			});
-		};
-	})();
-</script>
 
 {{end}}
