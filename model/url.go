@@ -18,8 +18,8 @@ type Url struct {
 
 func (u *Url) BuildUrls() {
 	code := u.Short // save code before overwriting
-	u.Short = fmt.Sprintf("%s/%s", config.Env.AppUrl, code)
-	u.Stat = fmt.Sprintf("%s/stats/%s", config.Env.AppUrl, code)
+	u.Short = fmt.Sprintf("%s/%s", config.Env.App.Url, code)
+	u.Stat = fmt.Sprintf("%s/stats/%s", config.Env.App.Url, code)
 }
 
 type ClickEvent struct {

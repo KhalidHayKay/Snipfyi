@@ -11,7 +11,8 @@ import (
 )
 
 func sendMagicLinkEmail(email string, token string) {
-	dailer := gomail.NewDialer("sandbox.smtp.mailtrap.io", 587, "45f2a26015facd", "d96a6f0d7d6b1c")
+	log.Println("config: ", config.Env.Mailer)
+	dailer := gomail.NewDialer(config.Env.Mailer.Host, config.Env.Mailer.Port, config.Env.Mailer.User, config.Env.Mailer.Pass)
 
 	// 1. Parse the HTML template file
 	t, err := template.ParseFiles("templates/emails/magic-link.html")
@@ -20,10 +21,10 @@ func sendMagicLinkEmail(email string, token string) {
 	}
 
 	data := map[string]any{
-		"Email":     "user@example.com",
-		"MagicLink": fmt.Sprintf("%s/key/activate?token=%s", config.Env.AppUrl, token),
-		"ExpiresIn": "24 hours",
-		"AppUrl":    config.Env.AppUrl,
+		"Email":     email,
+		"MagicLink": fmt.Sprintf("%s/key/activate?token=%s", config.Env.App.Url, token),
+		"ExpiresIn": "15 minutes",
+		"AppUrl":    config.Env.App.Url,
 		// "RequestIP": r.RemoteAddr,
 	}
 
@@ -34,12 +35,14 @@ func sendMagicLinkEmail(email string, token string) {
 	}
 
 	message := gomail.NewMessage()
-	message.SetHeader("From", "noreply@smply.com")
+	message.SetHeader("From", "Smply<noreply@smply.cc>")
 	message.SetHeader("To", email)
 	message.SetHeader("Subject", "Your Magic Link")
 	message.SetBody("text/html", body.String())
 
 	if err := dailer.DialAndSend(message); err != nil {
 		log.Printf("Failed to send email: %v", err)
+	} else {
+		log.Printf("Magic link email sent to %s", email)
 	}
 }

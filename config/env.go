@@ -4,15 +4,31 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
+type AppConfig struct {
+	Environment string
+	Port        string
+	Url         string
+}
+
+type MailerConfig struct {
+	Host string
+	Port int
+	User string
+	Pass string
+	From string
+}
+
 type EnvType struct {
-	AppEnv  string
-	AppPort string
-	AppUrl  string
-	DbUrl   string
+	App AppConfig
+
+	DbUrl string
+
+	Mailer MailerConfig
 }
 
 var Env *EnvType
@@ -23,14 +39,29 @@ func LoadEnv() {
 		log.Println(err)
 	}
 
-	Env = &EnvType{
-		AppEnv:  os.Getenv("APP_ENV"),
-		AppPort: os.Getenv("PORT"),
-		AppUrl:  os.Getenv("APP_URL"),
-		DbUrl:   os.Getenv("DB_URL"),
+	mailerPort, err := strconv.Atoi(os.Getenv("MAILER_PORT"))
+	if err != nil {
+		// handle error
 	}
 
-	if Env.AppUrl == "" || Env.DbUrl == "" {
+	Env = &EnvType{
+		App: AppConfig{
+			Environment: os.Getenv("APP_ENV"),
+			Port:        os.Getenv("PORT"),
+			Url:         os.Getenv("APP_URL"),
+		},
+
+		DbUrl: os.Getenv("DB_URL"),
+
+		Mailer: MailerConfig{
+			Host: os.Getenv("MAILER_HOST"),
+			Port: mailerPort,
+			User: os.Getenv("MAILER_USER"),
+			Pass: os.Getenv("MAILER_PASS"),
+			From: os.Getenv("MAILER_FROM"),
+		},
+	}
+	if Env.App.Url == "" || Env.DbUrl == "" {
 		log.Println(errors.New("APP_URL or DB_URL not set"))
 	}
 }

@@ -38,6 +38,7 @@ func main() {
 	mux.Handle("GET /key/activate", http.HandlerFunc(handler.CreateApiKey))
 
 	// Private API routes
+	//#TODO - Need to protect these routes
 	mux.Handle("POST /api/internal/shorten", http.HandlerFunc(handler.Shorten))
 	mux.Handle("POST /api/internal/key/request", http.HandlerFunc(handler.RequestApiKey))
 
@@ -46,9 +47,9 @@ func main() {
 	mux.Handle("GET /api/v1/stats/{code}", middleware.Apply(handler.StatsApi, middleware.RequireKey))
 	mux.Handle("GET /api/v1/redirect/{code}", middleware.Apply(handler.RedirectApi, middleware.RequireKey))
 
-	port := config.Env.AppPort
+	port := config.Env.App.Port
 
-	if port == "" && config.Env.AppEnv == "development" {
+	if port == "" && config.Env.App.Environment == "development" {
 		port = "8000"
 	}
 
@@ -57,6 +58,6 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Printf("Starting server on port %s in %s mode", port, config.Env.AppEnv)
+	log.Printf("Starting server on port %s in %s mode", port, config.Env.App.Environment)
 	log.Fatal(server.ListenAndServe())
 }
