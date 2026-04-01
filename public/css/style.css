@@ -2044,3 +2044,139 @@ input {
 	font-weight: 400;
 	color: var(--grey3);
 }
+
+/* ERROR PAGE */
+
+.error-page {
+	min-height: calc(100vh - 56px - 65px);
+	display: flex;
+	align-items: center;
+	padding: 72px 0 80px;
+}
+
+.error-layout {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 64px;
+	align-items: center;
+	max-width: 840px;
+}
+
+.error-visual {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 20px;
+}
+
+.error-code-display {
+	user-select: none;
+}
+
+.error-status-num {
+	font-family: var(--font-serif);
+	font-size: clamp(80px, 12vw, 140px);
+	font-weight: 400;
+	color: var(--grey2);
+	line-height: 1;
+	letter-spacing: -0.04em;
+	display: block;
+}
+
+.error-status-bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.error-status-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+}
+
+.error-status-dot--err {
+	background: var(--danger);
+	opacity: 0.9;
+}
+
+.error-status-dot--warn {
+	background: #f59e0b;
+	opacity: 0.5;
+}
+
+.error-status-dot--ok {
+	background: var(--success);
+	opacity: 0.25;
+}
+
+.error-kicker {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--grey3);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	margin-bottom: 14px;
+}
+
+.error-title {
+	font-family: var(--font-serif);
+	font-size: clamp(32px, 4.5vw, 52px);
+	font-weight: 400;
+	color: var(--ink);
+	letter-spacing: -0.025em;
+	line-height: 1.08;
+	margin-bottom: 18px;
+}
+
+.error-title em {
+	font-style: italic;
+	color: var(--danger);
+}
+
+.error-body {
+	font-size: 15px;
+	color: var(--grey4);
+	line-height: 1.75;
+	max-width: 380px;
+	margin-bottom: 32px;
+}
+
+.error-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 24px;
+}
+
+.error-hint {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	font-size: 12px;
+	color: var(--grey3);
+	line-height: 1.6;
+}
+
+.error-hint svg {
+	flex-shrink: 0;
+	color: var(--grey3);
+}
+
+@media (max-width: 680px) {
+	.error-layout {
+		grid-template-columns: 1fr;
+		gap: 32px;
+	}
+	.error-visual {
+		text-align: center;
+		align-items: center;
+	}
+	.error-body {
+		max-width: 100%;
+	}
+}

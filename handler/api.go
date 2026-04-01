@@ -4,10 +4,12 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"smply/internal/render"
 	"smply/service"
 	"smply/utils"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 )
@@ -17,12 +19,12 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 	alias := r.FormValue("alias")
 
 	if url == "" {
-		Error(w, http.StatusUnprocessableEntity, "'url' is a required field")
+		render.ErrorJSON(w, http.StatusUnprocessableEntity, "'url' is a required field")
 		return
 	}
 
 	if !utils.IsValidURL(url) {
-		Error(w, http.StatusUnprocessableEntity, "Url not valid")
+		render.ErrorJSON(w, http.StatusUnprocessableEntity, "Url not valid")
 		return
 	}
 
@@ -37,41 +39,41 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 			if pgErr.ConstraintName == "urls_short_key" || strings.Contains(pgErr.Message, "urls.short") {
 				msg = "This alias is already taken"
 			}
-			Error(w, http.StatusConflict, msg)
+			render.ErrorJSON(w, http.StatusConflict, msg)
 			return
 		}
 
-		Error(w, http.StatusInternalServerError, "Internal server error")
+		render.ErrorJSON(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
-	Success(w, http.StatusCreated, result)
+	render.JSON(w, http.StatusCreated, result)
 }
 
-func StatsApi(w http.ResponseWriter, r *http.Request) {
-	code := r.PathValue("code")
+func Stats(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
 
 	stat, err := service.GetStats(r.Context(), code)
 
 	if err != nil {
 		log.Println(err)
-		Error(w, http.StatusNotFound, "Not found")
+		render.ErrorJSON(w, http.StatusNotFound, "Not found")
 		return
 	}
 
-	Success(w, http.StatusOK, stat)
+	render.JSON(w, http.StatusOK, stat)
 }
 
-func RedirectApi(w http.ResponseWriter, r *http.Request) {
-	code := r.PathValue("code")
+func Redirect(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
 
 	stat, err := service.GetByShort(r.Context(), code)
 
 	if err != nil {
 		log.Println(err)
-		Error(w, http.StatusNotFound, "Not found")
+		render.ErrorJSON(w, http.StatusNotFound, "Not found")
 		return
 	}
 
-	Success(w, http.StatusOK, stat)
+	render.JSON(w, http.StatusOK, stat)
 }

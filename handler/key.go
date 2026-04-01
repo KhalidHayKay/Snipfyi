@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"smply/internal/render"
 	"smply/service"
 	"text/template"
 )
@@ -11,32 +12,32 @@ func RequestApiKey(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
 	if email == "" {
-		Error(w, http.StatusUnprocessableEntity, "'email' is a required field")
+		render.ErrorJSON(w, http.StatusUnprocessableEntity, "'email' is a required field")
 		return
 	}
 
 	err := service.RequestApiKey(r.Context(), email)
 	if err != nil {
 		log.Println(err)
-		Error(w, http.StatusInternalServerError, "Failed to process request")
+		render.ErrorJSON(w, http.StatusInternalServerError, "Failed to process request")
 		return
 	}
 
-	Success(w, http.StatusOK, nil)
+	render.JSON(w, http.StatusOK, nil)
 }
 
 func CreateApiKey(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	if token == "" {
-		Error(w, http.StatusNotFound, "cannot find token")
+		render.ErrorPage(w, http.StatusUnprocessableEntity, "cannot find token")
 		return
 	}
 
 	key, err := service.CreateApiKey(r.Context(), token)
 	if err != nil {
 		log.Println(err)
-		Error(w, http.StatusNotFound, "Not found")
+		render.ErrorPage(w, http.StatusUnprocessableEntity, "Unable to create API key")
 		return
 	}
 

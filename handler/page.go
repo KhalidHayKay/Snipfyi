@@ -2,12 +2,14 @@ package handler
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net/http"
+	"smply/internal/render"
 	"smply/service"
-	"smply/views"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +18,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		"Page":  "home",
 	}
 
-	views.Render(w, "home.html", data)
+	render.Page(w, "home.html", data)
 }
 
 func ShortenPage(w http.ResponseWriter, r *http.Request) {
@@ -25,28 +27,28 @@ func ShortenPage(w http.ResponseWriter, r *http.Request) {
 		"Page":  "shorten",
 	}
 
-	views.Render(w, "shorten.html", data)
+	render.Page(w, "shorten.html", data)
 }
 
 func ApiPage(w http.ResponseWriter, r *http.Request) {
-	views.Render(w, "api.html", map[string]any{
+	render.Page(w, "api.html", map[string]any{
 		"Title": "API",
 		"Page":  "api",
 	})
 }
 
-func Redirect(w http.ResponseWriter, r *http.Request) {
-	code := r.PathValue("code")
+func ResolveRedirect(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
 
 	url, err := service.GetByShort(r.Context(), code)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			Error(w, http.StatusNotFound, "Not found")
+		if err == pgx.ErrNoRows {
+			render.ErrorPage(w, http.StatusNotFound, "Not found")
 			return
 		}
 
-		Error(w, http.StatusInternalServerError, "Internal server error")
+		render.ErrorPage(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
@@ -64,14 +66,13 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url.Original, http.StatusFound)
 }
 
-func Stats(w http.ResponseWriter, r *http.Request) {
-	code := r.PathValue("code")
+func StatsPage(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
 
 	stat, err := service.GetStats(r.Context(), code)
-
 	if err != nil {
 		log.Println(err)
-		Error(w, http.StatusNotFound, "Not found")
+		render.ErrorPage(w, http.StatusNotFound, "Not found")
 		return
 	}
 
@@ -81,5 +82,5 @@ func Stats(w http.ResponseWriter, r *http.Request) {
 		"Stats": stat,
 	}
 
-	views.Render(w, "stats.html", data)
+	render.Page(w, "stats.html", data)
 }
