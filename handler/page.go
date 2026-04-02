@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"smply/internal/render"
+	"smply/model"
 	"smply/service"
 	"time"
 
@@ -13,27 +14,25 @@ import (
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	data := map[string]string{
-		"Title": "Home",
-		"Page":  "home",
-	}
-
-	render.Page(w, "home.html", data)
+	render.Page(w, "home.html", render.ViewData{
+		Title: "Home",
+		Page:  "home",
+	})
 }
 
 func ShortenPage(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
-		"Title": "Shorten URL",
-		"Page":  "shorten",
+	data := render.ViewData{
+		Title: "Shorten URL",
+		Page:  "shorten",
 	}
 
 	render.Page(w, "shorten.html", data)
 }
 
 func ApiPage(w http.ResponseWriter, r *http.Request) {
-	render.Page(w, "api.html", map[string]any{
-		"Title": "API",
-		"Page":  "api",
+	render.Page(w, "api.html", render.ViewData{
+		Title: "API",
+		Page:  "api",
 	})
 }
 
@@ -76,11 +75,11 @@ func StatsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"Title": "URL Stats",
-		"Page":  "stats",
-		"Stats": stat,
-	}
-
-	render.Page(w, "stats.html", data)
+	render.Page(w, "stats.html", render.ViewData{
+		Title: "URL Stats",
+		Page:  "stats",
+		Data: map[string]model.Url{
+			"Stats": stat,
+		},
+	})
 }

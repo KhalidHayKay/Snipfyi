@@ -146,6 +146,7 @@ input {
 }
 
 /* ── Nav ── */
+/* ── Nav ── */
 .nav {
 	position: sticky;
 	top: 0;
@@ -168,6 +169,7 @@ input {
 	font-weight: 600;
 	color: var(--ink);
 	letter-spacing: -0.03em;
+	flex-shrink: 0;
 }
 .logo-mark {
 	width: 27px;
@@ -216,7 +218,8 @@ input {
 .nav-right {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
+	flex-shrink: 0;
 }
 .nav-github {
 	display: flex;
@@ -228,6 +231,7 @@ input {
 	color: var(--grey4);
 	border: 1px solid var(--grey2);
 	transition: var(--transition);
+	flex-shrink: 0;
 }
 .nav-github:hover {
 	color: var(--ink);
@@ -238,6 +242,79 @@ input {
 	width: 16px;
 	height: 16px;
 	fill: currentColor;
+}
+
+/* hamburger — mobile only */
+.nav-burger {
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+	width: 32px;
+	height: 32px;
+	background: none;
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	transition: var(--transition);
+	flex-shrink: 0;
+}
+.nav-burger:hover {
+	border-color: var(--grey3);
+	background: var(--grey1);
+}
+.nav-burger span {
+	display: block;
+	width: 14px;
+	height: 1.5px;
+	background: var(--grey4);
+	border-radius: 2px;
+	transition: var(--transition);
+	transform-origin: center;
+}
+.nav-burger.is-open span:nth-child(1) {
+	transform: translateY(6.5px) rotate(45deg);
+}
+.nav-burger.is-open span:nth-child(2) {
+	opacity: 0;
+	transform: scaleX(0);
+}
+.nav-burger.is-open span:nth-child(3) {
+	transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* mobile drawer */
+.nav-drawer {
+	display: none;
+	border-top: 1px solid var(--grey2);
+	background: rgba(250, 250, 249, 0.98);
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-drawer.is-open {
+	max-height: 200px;
+}
+.nav-drawer-links {
+	list-style: none;
+	padding: 8px 0 12px;
+}
+.nav-drawer-links a {
+	display: block;
+	padding: 11px 28px;
+	font-size: 15px;
+	font-weight: 400;
+	color: var(--grey4);
+	transition: var(--transition);
+}
+.nav-drawer-links a:hover,
+.nav-drawer-links a.active {
+	color: var(--ink);
+	background: var(--grey1);
+}
+.nav-drawer-links a.active {
+	font-weight: 500;
 }
 
 /* ── PAGES: Hero & Home ── */
@@ -800,20 +877,20 @@ input {
 /* Footer */
 .footer {
 	border-top: 1px solid var(--grey2);
-	padding: 22px 0;
+	padding: 20px 0;
 	background: var(--warm);
 }
 .footer-inner {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 16px;
 	flex-wrap: wrap;
-	gap: 12px;
 }
 .footer-left {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 10px;
 }
 .footer-wordmark {
 	font-size: 14px;
@@ -824,36 +901,56 @@ input {
 .footer-wordmark .tld {
 	color: var(--blue);
 }
-.footer-divider {
+.footer-sep {
 	width: 1px;
-	height: 14px;
+	height: 12px;
 	background: var(--grey2);
+	flex-shrink: 0;
 }
-.footer-copy {
+.footer-byline {
 	font-size: 12px;
 	color: var(--grey3);
+}
+.footer-byline a {
+	color: var(--grey4);
+	transition: var(--transition);
+}
+.footer-byline a:hover {
+	color: var(--ink);
 }
 .footer-right {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+	gap: 6px;
 }
-.footer-ext {
+.footer-icon-link {
 	display: flex;
 	align-items: center;
-	gap: 5px;
-	font-size: 12px;
-	color: var(--grey3);
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--grey2);
+	color: var(--grey4);
 	transition: var(--transition);
 }
-.footer-ext:hover {
+.footer-icon-link:hover {
 	color: var(--ink);
+	border-color: var(--grey3);
+	background: var(--grey1);
 }
-.footer-ext svg {
+.footer-icon-link svg {
 	width: 14px;
 	height: 14px;
 	fill: currentColor;
-	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.footer-inner {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+	}
 }
 
 /* ── Result QR additions ── */
@@ -1244,9 +1341,27 @@ input {
 	.hero-title {
 		font-size: 44px;
 	}
-	.footer-inner {
+}
+
+@media (max-width: 640px) {
+	/* nav: swap desktop links for hamburger */
+	.nav-links {
+		display: none;
+	}
+	.nav-burger {
+		display: flex;
+	}
+	.nav-drawer {
+		display: block;
+	}
+
+	/* footer: stack brand + tagline */
+	.footer-top {
 		flex-direction: column;
-		align-items: flex-start;
+		gap: 10px;
+	}
+	.footer-tagline {
+		max-width: 100%;
 	}
 }
 @media (max-width: 480px) {
@@ -2046,7 +2161,6 @@ input {
 }
 
 /* ERROR PAGE */
-
 .error-page {
 	min-height: calc(100vh - 56px - 65px);
 	display: flex;
@@ -2062,6 +2176,7 @@ input {
 	max-width: 840px;
 }
 
+/* Visual container */
 .error-visual {
 	flex-shrink: 0;
 	display: flex;
@@ -2070,10 +2185,15 @@ input {
 	gap: 20px;
 }
 
+/* Code display (supports both styles) */
 .error-code-display {
+	display: flex;
+	align-items: center;
+	gap: 0;
 	user-select: none;
 }
 
+/* 5xx style */
 .error-status-num {
 	font-family: var(--font-serif);
 	font-size: clamp(80px, 12vw, 140px);
@@ -2084,6 +2204,17 @@ input {
 	display: block;
 }
 
+/* 404 style */
+.error-num {
+	font-family: var(--font-serif);
+	font-size: clamp(100px, 14vw, 160px);
+	font-weight: 400;
+	color: var(--grey2);
+	line-height: 1;
+	letter-spacing: -0.04em;
+}
+
+/* Status dots (5xx) */
 .error-status-bar {
 	display: flex;
 	align-items: center;
@@ -2112,6 +2243,26 @@ input {
 	opacity: 0.25;
 }
 
+/* 404 icon ring */
+.error-icon-ring {
+	width: clamp(80px, 11vw, 130px);
+	height: clamp(80px, 11vw, 130px);
+	border-radius: 50%;
+	border: 3px solid var(--grey2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 -4px;
+	flex-shrink: 0;
+}
+
+.error-icon-ring svg {
+	width: 40%;
+	height: 40%;
+	stroke: var(--grey3);
+}
+
+/* Text content */
 .error-kicker {
 	font-size: 11px;
 	font-weight: 600;
@@ -2131,9 +2282,15 @@ input {
 	margin-bottom: 18px;
 }
 
+/* Allow both color variants */
+
 .error-title em {
 	font-style: italic;
-	color: var(--danger);
+	color: var(--danger); /* fallback */
+}
+
+.error-page[data-error='404'] .error-title em {
+	color: var(--blue);
 }
 
 .error-body {
@@ -2167,15 +2324,22 @@ input {
 	color: var(--grey3);
 }
 
+/* Responsive */
 @media (max-width: 680px) {
 	.error-layout {
 		grid-template-columns: 1fr;
 		gap: 32px;
 	}
+
 	.error-visual {
 		text-align: center;
 		align-items: center;
 	}
+
+	.error-code-display {
+		justify-content: center;
+	}
+
 	.error-body {
 		max-width: 100%;
 	}

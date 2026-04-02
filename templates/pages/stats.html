@@ -13,17 +13,17 @@
 
 			<div class="stats-kicker">Link Stats</div>
 			<h1 class="stats-title">
-				<em>{{ .Stats.Short }}</em>
+				<em>{{ .Data.Stats.Short }}</em>
 			</h1>
 			<div class="stats-created">
-				Created {{ .Stats.Created.Format "Jan 2, 2006" }} · {{ .Stats.Created.Format
-				"3:04 PM" }}
+				Created {{ .Data.Stats.Created.Format "Jan 2, 2006" }} · {{
+				.Data.Stats.Created.Format "3:04 PM" }}
 			</div>
 
 			<!-- Big click count -->
 			<div class="stats-hero-num">
 				<div>
-					<div class="stats-big-num">{{ .Stats.Visited }}</div>
+					<div class="stats-big-num">{{ .Data.Stats.Visited }}</div>
 				</div>
 				<div>
 					<div class="stats-big-label">
@@ -38,8 +38,8 @@
 				<div class="stats-card">
 					<div class="stats-card-label">Short URL</div>
 					<div class="stats-card-value">
-						<a href="{{ .Stats.Short }}" target="_blank" rel="noopener"
-							>{{ .Stats.Short }}</a
+						<a href="{{ .Data.Stats.Short }}" target="_blank" rel="noopener"
+							>{{ .Data.Stats.Short }}</a
 						>
 					</div>
 				</div>
@@ -47,18 +47,18 @@
 				<div class="stats-card">
 					<div class="stats-card-label">Created</div>
 					<div class="stats-card-value">
-						{{ .Stats.Created.Format "Jan 2, 2006" }}
+						{{ .Data.Stats.Created.Format "Jan 2, 2006" }}
 					</div>
 				</div>
 
 				<div class="stats-card">
 					<div class="stats-card-label">Last visited</div>
 					<div class="stats-card-value">
-						{{if not .Stats.LastVisited}}
+						{{if not .Data.Stats.LastVisited}}
 						<span class="stats-card-empty">Never</span>
-						{{else}} {{ .Stats.LastVisited.Format "Jan 2, 2006" }}
+						{{else}} {{ .Data.Stats.LastVisited.Format "Jan 2, 2006" }}
 						<span class="stats-card-time">
-							{{ .Stats.LastVisited.Format "3:04 PM" }}
+							{{ .Data.Stats.LastVisited.Format "3:04 PM" }}
 						</span>
 						{{end}}
 					</div>
@@ -68,12 +68,12 @@
 					<div class="stats-card-label">Original URL</div>
 					<div class="stats-card-value mono">
 						<a
-							href="{{ .Stats.Original }}"
+							href="{{ .Data.Stats.Original }}"
 							target="_blank"
 							rel="noopener"
-							title="{{ .Stats.Original }}"
+							title="{{ .Data.Stats.Original }}"
 						>
-							{{ .Stats.Original }}
+							{{ .Data.Stats.Original }}
 						</a>
 					</div>
 				</div>

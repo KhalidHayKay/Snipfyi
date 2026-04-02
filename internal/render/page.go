@@ -6,8 +6,14 @@ import (
 	"net/http"
 )
 
+type ViewData struct {
+	Title string
+	Page  string
+	Data  any
+}
+
 // Page renders an HTML template with the given data
-func Page(w http.ResponseWriter, page string, data any) {
+func Page(w http.ResponseWriter, page string, data ViewData) {
 	t, err := template.ParseFiles(
 		"templates/layouts/layout.html",
 		"templates/pages/"+page,
