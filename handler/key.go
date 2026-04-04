@@ -6,6 +6,8 @@ import (
 	"smply/internal/render"
 	"smply/service"
 	"text/template"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func RequestApiKey(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +38,11 @@ func CreateApiKey(w http.ResponseWriter, r *http.Request) {
 
 	key, err := service.CreateApiKey(r.Context(), token)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			render.ErrorPage(w, http.StatusUnprocessableEntity, "Invalid or expired token")
+			return
+		}
+
 		log.Println(err)
 		render.ErrorPage(w, http.StatusUnprocessableEntity, "Unable to create API key")
 		return

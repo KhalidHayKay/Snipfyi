@@ -8,6 +8,17 @@ import (
 )
 
 func RequestApiKey(ctx context.Context, email string) error {
+	_, err := config.DB.Exec(ctx, `
+		UPDATE magic_tokens
+		SET used_at = NOW()
+		WHERE email = $1
+		  AND expires_at > NOW()
+		  AND used_at IS NULL
+	`, email)
+	if err != nil {
+		return err
+	}
+
 	token, err := utils.GenerateMagicToken()
 	if err != nil {
 		return err
@@ -16,8 +27,8 @@ func RequestApiKey(ctx context.Context, email string) error {
 	var magicToken model.MagicToken
 
 	err = config.DB.QueryRow(ctx, `
-		INSERT INTO magic_tokens (email, token_hash, expires_at)
-		VALUES ($1, $2, NOW() + INTERVAL '15 minutes')
+		INSERT INTO magic_tokens (email, token_hash, expires_at, created_at)
+		VALUES ($1, $2, NOW() + INTERVAL '15 minutes', NOW())
 		RETURNING id, email, token_hash, expires_at
 	`, email, utils.Hash(token)).Scan(
 		&magicToken.Id,
@@ -25,14 +36,13 @@ func RequestApiKey(ctx context.Context, email string) error {
 		&magicToken.TokenHash,
 		&magicToken.ExpiresAt,
 	)
+	if err != nil {
+		return err
+	}
 
 	go func() {
 		sendMagicLinkEmail(email, token)
 	}()
-
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -45,13 +55,35 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 	err := config.DB.QueryRow(ctx, `
 		SELECT id, email, token_hash, expires_at
 		FROM magic_tokens
-		WHERE token_hash = $1 AND expires_at > NOW()
+		WHERE token_hash = $1 
+			AND expires_at > NOW() 
+			AND used_at IS NULL
 	`, tokenHash).Scan(
 		&magicToken.Id,
 		&magicToken.Email,
 		&magicToken.TokenHash,
 		&magicToken.ExpiresAt,
 	)
+	if err != nil {
+		return "", err
+	}
+
+	// Mark magic link Token as used
+	_, err = config.DB.Exec(ctx, `
+		UPDATE magic_tokens
+		SET used_at = NOW()
+		WHERE id = $1
+	`, magicToken.Id)
+	if err != nil {
+		return "", err
+	}
+
+	// Revoke existing API keys for this email
+	_, err = config.DB.Exec(ctx, `
+		UPDATE api_keys
+		SET expires_at = NOW()
+		WHERE owner_email = $1
+	`, magicToken.Email)
 	if err != nil {
 		return "", err
 	}

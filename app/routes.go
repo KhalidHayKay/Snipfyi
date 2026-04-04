@@ -31,11 +31,16 @@ func setupRouter() *chi.Mux {
 
 	// Private API routes (TODO: protect these routes)
 	router.Post("/api/internal/shorten", handler.Shorten)
-	router.Post("/api/internal/key/request", handler.RequestApiKey)
+	router.Route("/api/internal/key/request", func(r chi.Router) {
+		rateLimiter := limiter.NewRateLimiter(1/60.0, 1)
+		r.Use(rateLimiter.Middleware)
+
+		r.Post("/", handler.RequestApiKey)
+	})
 
 	// Public API routes with rate limiting and key validation
-	rateLimiter := limiter.NewRateLimiter(10/60.0, 10)
 	router.Route("/api/v1", func(r chi.Router) {
+		rateLimiter := limiter.NewRateLimiter(10/60.0, 10)
 		r.Use(rateLimiter.Middleware)
 		r.Use(middleware.RequireKey)
 

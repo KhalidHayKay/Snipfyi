@@ -35,7 +35,7 @@ func InitDB() error {
 
 		CREATE TABLE IF NOT EXISTS api_keys (
 			id BIGSERIAL PRIMARY KEY,
-			owner_email TEXT NOT NULL,
+			owner_email TEXT NOT NULL UNIQUE,
 			key_hash TEXT NOT NULL,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			expires_at TIMESTAMP NOT NULL,

@@ -3,6 +3,7 @@ package limiter
 import (
 	"encoding/json"
 	"net/http"
+	"smply/utils"
 	"sync"
 	"time"
 )
@@ -73,7 +74,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		key := r.Header.Get("X-API-Key")
 		if key == "" {
-			key = r.RemoteAddr
+			key = utils.GetClientIP(r)
 		}
 
 		if !rl.getLimiter(key).Allow() {

@@ -23,7 +23,7 @@ func RequireKey(next http.Handler) http.Handler {
 		}
 
 		if !valid {
-			render.ErrorJSON(w, http.StatusUnauthorized, "Invalid API key")
+			render.ErrorJSON(w, http.StatusUnauthorized, "Invalid or expired API key")
 			return
 		}
 

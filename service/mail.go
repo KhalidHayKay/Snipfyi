@@ -11,8 +11,12 @@ import (
 )
 
 func sendMagicLinkEmail(email string, token string) {
-	log.Println("config: ", config.Env.Mailer)
-	dailer := gomail.NewDialer(config.Env.Mailer.Host, config.Env.Mailer.Port, config.Env.Mailer.User, config.Env.Mailer.Pass)
+	dailer := gomail.NewDialer(
+		config.Env.Mailer.Host,
+		config.Env.Mailer.Port,
+		config.Env.Mailer.User,
+		config.Env.Mailer.Pass,
+	)
 
 	// 1. Parse the HTML template file
 	t, err := template.ParseFiles("templates/emails/magic-link.html")
