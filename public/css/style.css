@@ -1393,12 +1393,18 @@ input {
 	grid-template-columns: 300px 1fr;
 	gap: 48px;
 	align-items: start;
+	min-width: 0;
 }
 
 /* ── Sidebar ── */
+.api-sidebar {
+	min-width: 0;
+	max-width: 100%;
+}
 .api-sidebar-sticky {
 	position: sticky;
 	top: calc(56px + 24px); /* nav height + breathing room */
+	min-width: 0;
 }
 .api-sidebar-heading {
 	font-size: 13px;
@@ -1584,6 +1590,13 @@ input {
 	font-family: monospace;
 	font-size: 12px;
 	color: var(--ink4, var(--ink));
+	word-break: break-all;
+}
+
+/* API docs main container */
+.api-docs {
+	min-width: 0;
+	max-width: 100%;
 }
 
 .api-doc-block {
@@ -1592,6 +1605,7 @@ input {
 	border-radius: var(--radius-lg);
 	overflow: hidden;
 	margin-bottom: 16px;
+	min-width: 0;
 }
 
 .api-endpoint-bar {
@@ -1641,6 +1655,8 @@ input {
 .api-doc-group {
 	padding: 16px 20px;
 	border-bottom: 1px solid var(--grey2);
+	min-width: 0;
+	max-width: 100%;
 }
 .api-doc-group:last-child {
 	border-bottom: none;
@@ -1679,6 +1695,11 @@ input {
 	background: var(--ink);
 	border-radius: var(--radius);
 	overflow: hidden;
+	max-width: 100%;
+	width: 100%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
 }
 .api-code-bar {
 	display: flex;
@@ -1686,12 +1707,16 @@ input {
 	justify-content: space-between;
 	padding: 7px 12px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	flex-shrink: 0;
 }
 .api-code-bar > span {
 	font-size: 10px;
 	font-weight: 500;
 	color: rgba(255, 255, 255, 0.28);
 	letter-spacing: 0.5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .api-code-copy {
 	font-family: var(--font-sans);
@@ -1702,6 +1727,8 @@ input {
 	border: none;
 	cursor: pointer;
 	transition: var(--transition);
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 .api-code-copy:hover {
 	color: rgba(255, 255, 255, 0.75);
@@ -1714,7 +1741,11 @@ input {
 	line-height: 1.75;
 	color: rgba(255, 255, 255, 0.82);
 	overflow-x: auto;
+	overflow-y: hidden;
 	white-space: pre;
+	max-width: 100%;
+	min-width: 0;
+	flex-shrink: 1;
 }
 
 /* param table */
@@ -1807,6 +1838,57 @@ input {
 	}
 	.api-sidebar-sticky {
 		position: static;
+	}
+}
+
+@media (max-width: 520px) {
+	.container {
+		padding: 0 16px;
+	}
+	.api-code-block pre {
+		font-size: 11px;
+		padding: 12px 12px;
+	}
+}
+
+@media (max-width: 450px) {
+	.container {
+		padding: 0 14px;
+	}
+	.api-body {
+		gap: 20px;
+	}
+	.api-code-block pre {
+		font-size: 10px;
+		padding: 10px 12px;
+	}
+	.api-endpoint-bar {
+		padding: 12px 14px;
+		gap: 6px;
+		font-size: 13px;
+	}
+	.api-doc-group {
+		padding: 12px 14px;
+	}
+	.api-sidebar-heading {
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 360px) {
+	.container {
+		padding: 0 12px;
+	}
+	.api-body {
+		gap: 16px;
+	}
+	.api-code-block pre {
+		font-size: 9px;
+		padding: 8px 10px;
+		line-height: 1.5;
+	}
+	.api-doc-group {
+		padding: 10px 12px;
 	}
 }
 

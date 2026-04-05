@@ -16,16 +16,36 @@ function showToast(msg, type = 'success') {
 function copyText(text) {
 	navigator.clipboard
 		.writeText(text)
-		.then(() => showToast('Copied to clipboard'))
-		.catch(() => {
-			const el = document.createElement('textarea');
-			el.value = text;
-			el.style.cssText = 'position:fixed;opacity:0';
-			document.body.appendChild(el);
-			el.select();
-			document.execCommand('copy');
-			el.remove();
+		.then(() => {
 			showToast('Copied to clipboard');
+			// Mark as copied for beforeunload on API key pages
+			if (window.__keyCopied !== undefined) {
+				window.__keyCopied = true;
+			}
+		})
+		.catch((err) => {
+			console.error('Copy failed:', err);
+			showToast('Failed to copy', 'error');
+		});
+}
+
+// ── Copy code block (for API docs) ──
+function copyCode(button, codeId) {
+	const codeEl = document.getElementById(codeId);
+	if (!codeEl) return;
+	const text = codeEl.textContent;
+	navigator.clipboard
+		.writeText(text)
+		.then(() => {
+			const prev = button.textContent;
+			button.textContent = 'Copied!';
+			setTimeout(() => {
+				button.textContent = prev;
+			}, 2000);
+		})
+		.catch((err) => {
+			console.error('Copy failed:', err);
+			showToast('Failed to copy', 'error');
 		});
 }
 
@@ -73,24 +93,14 @@ function initApiKeyPage() {
 
 	window.doCopy = function () {
 		const key = keyValueEl.textContent;
-		navigator.clipboard
-			.writeText(key)
-			.then(() => {
-				if (keyCopiedEl) {
-					keyCopiedEl.classList.add('show');
-					setTimeout(() => {
-						keyCopiedEl.classList.remove('show');
-					}, 3000);
-				}
-				// Mark as copied for beforeunload
-				if (window.__keyCopied !== undefined) {
-					window.__keyCopied = true;
-				}
-			})
-			.catch((err) => {
-				console.error('Copy failed:', err);
-				showToast('Failed to copy', 'error');
-			});
+		copyText(key);
+		// Show copied feedback on this page
+		if (keyCopiedEl) {
+			keyCopiedEl.classList.add('show');
+			setTimeout(() => {
+				keyCopiedEl.classList.remove('show');
+			}, 3000);
+		}
 	};
 
 	// Track if key was copied before leave
@@ -117,87 +127,8 @@ function initApiKeyPage() {
 
 // ── API Page ──
 function initApiPage() {
-	const apiForm = document.getElementById('api-key-form');
-	if (!apiForm) return;
-
-	apiForm.addEventListener('submit', async function (e) {
-		e.preventDefault();
-		const emailInput = document.getElementById('api-email');
-		const email = emailInput?.value.trim();
-		if (!email) return;
-		const btn = document.getElementById('api-submit-btn');
-		const prevText = btn.textContent;
-		btn.textContent = 'Sending…';
-		btn.disabled = true;
-
-		try {
-			const body = new FormData();
-			body.append('email', email);
-
-			const res = await fetch('/api/internal/key/request', {
-				method: 'POST',
-				body,
-			});
-
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				throw new Error(err.error || 'Something went wrong');
-			}
-
-			if (emailInput) emailInput.closest('.field').style.display = 'none';
-			btn.style.display = 'none';
-			const sentTo = document.getElementById('api-sent-to');
-			if (sentTo) sentTo.textContent = email;
-			const success = document.getElementById('api-success');
-			if (success) success.style.display = 'flex';
-		} catch (err) {
-			showToast(err.message, 'error');
-		} finally {
-			btn.textContent = prevText;
-			btn.disabled = false;
-		}
-	});
-
-	window.copyApiKey = function () {
-		const keyValue = document.getElementById('api-key-value');
-		const copyBtn = document.getElementById('api-copy-btn');
-		if (!keyValue) return;
-		const key = keyValue.textContent;
-		navigator.clipboard
-			.writeText(key)
-			.then(() => {
-				if (copyBtn) {
-					const prev = copyBtn.innerHTML;
-					copyBtn.textContent = 'Copied!';
-					setTimeout(() => {
-						copyBtn.innerHTML = prev;
-					}, 2000);
-				}
-			})
-			.catch((err) => {
-				console.error('Copy failed:', err);
-				showToast('Failed to copy', 'error');
-			});
-	};
-
-	window.copyCode = function (btn, id) {
-		const codeEl = document.getElementById(id);
-		if (!codeEl) return;
-		const text = codeEl.textContent;
-		navigator.clipboard
-			.writeText(text)
-			.then(() => {
-				const prev = btn.textContent;
-				btn.textContent = 'Copied!';
-				setTimeout(() => {
-					btn.textContent = prev;
-				}, 2000);
-			})
-			.catch((err) => {
-				console.error('Copy failed:', err);
-				showToast('Failed to copy', 'error');
-			});
-	};
+	// Placeholder for API page initialization
+	// Can be extended for future API page features
 }
 
 document.addEventListener('DOMContentLoaded', () => {

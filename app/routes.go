@@ -16,6 +16,10 @@ func setupRouter() *chi.Mux {
 	// Global middleware
 	router.Use(chiMiddleware.Logger, chiMiddleware.Recoverer)
 
+	// Rate limiters
+	keyRequestRateLimiter := limiter.NewRateLimiter(2/60.0, 2)
+	publicAPIRateLimiter := limiter.NewRateLimiter(10/60.0, 10)
+
 	// Static files
 	files := http.FileServer(http.Dir("./public"))
 	router.Handle("/static/*", http.StripPrefix("/static/", files))
@@ -30,23 +34,16 @@ func setupRouter() *chi.Mux {
 	router.Get("/stats/{code}", handler.StatsPage)
 
 	router.Get("/api", handler.ApiPage)
+	router.With(keyRequestRateLimiter.Middleware).Post("/api", handler.RequestApiKey)
+
 	router.Get("/key/activate", handler.CreateApiKey)
 
 	router.Get("/{code}", handler.ResolveRedirect)
 	// Note: Specific stats routes should be defined before the catch-all redirect route to avoid conflicts
 
-	// Private API routes (TODO: protect these routes)
-	router.Route("/api/internal/key/request", func(r chi.Router) {
-		rateLimiter := limiter.NewRateLimiter(1/60.0, 1)
-		r.Use(rateLimiter.Middleware)
-
-		r.Post("/", handler.RequestApiKey)
-	})
-
 	// Public API routes with rate limiting and key validation
 	router.Route("/api/v1", func(r chi.Router) {
-		rateLimiter := limiter.NewRateLimiter(10/60.0, 10)
-		r.Use(rateLimiter.Middleware)
+		r.Use(publicAPIRateLimiter.Middleware)
 		r.Use(middleware.RequireKey)
 
 		r.Post("/shorten", handler.Shorten)

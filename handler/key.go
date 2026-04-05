@@ -13,19 +13,27 @@ import (
 func RequestApiKey(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
+	data := render.ViewData{
+		Title: "API",
+		Page:  "api",
+	}
+
 	if email == "" {
-		render.ErrorJSON(w, http.StatusUnprocessableEntity, "'email' is a required field")
+		data.Error = "'email' is a required field"
+		render.Page(w, "api.html", data)
 		return
 	}
 
 	err := service.RequestApiKey(r.Context(), email)
 	if err != nil {
 		log.Println(err)
-		render.ErrorJSON(w, http.StatusInternalServerError, "Failed to process request")
+		data.Error = "Failed to process request"
+		render.Page(w, "api.html", data)
 		return
 	}
 
-	render.JSON(w, http.StatusOK, nil)
+	data.Data = map[string]string{"SentTo": email}
+	render.Page(w, "api.html", data)
 }
 
 func CreateApiKey(w http.ResponseWriter, r *http.Request) {

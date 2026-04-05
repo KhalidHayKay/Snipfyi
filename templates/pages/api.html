@@ -23,7 +23,22 @@
 					</p>
 
 					<div class="form-card" id="api-request-card">
-						<form id="api-key-form">
+						{{ if .Error }}
+						<div
+							class="error-message"
+							style="
+								margin-bottom: 1.5rem;
+								/* padding: 1rem;
+								background-color: #ffebee;
+								border: 1px solid #f44336;
+								border-radius: 0.5rem; */
+								color: #c62828;
+							"
+						>
+							{{ .Error }}
+						</div>
+						{{ end }} {{ if not .Data }}
+						<form method="POST" action="/api">
 							<div class="field">
 								<label for="api-email">Email address</label>
 								<input
@@ -55,8 +70,8 @@
 								</svg>
 							</button>
 						</form>
-
-						<div class="api-success" id="api-success" style="display: none">
+						{{end}} {{ if .Data }}
+						<div class="api-success" id="api-success">
 							<div class="api-success-icon">
 								<svg
 									viewBox="0 0 24 24"
@@ -71,11 +86,18 @@
 							<div>
 								<div class="api-success-title">Check your inbox</div>
 								<div class="api-success-body">
-									Sent to <strong id="api-sent-to"></strong>. Follow the link to generate
-									your key.
+									<p>
+										Sent to <strong>{{.Data.SentTo}}</strong>. Follow the link to generate
+										your key.
+									</p>
+									<p style="font-size: 12px; margin-top: 0.5rem; color: #555">
+										Didn't get it?
+										<a href="/api" style="color: #0000ff"> Request again </a>
+									</p>
 								</div>
 							</div>
 						</div>
+						{{end}}
 					</div>
 				</div>
 			</aside>
@@ -107,7 +129,7 @@
 						<div class="api-code-block">
 							<div class="api-code-bar">
 								<span>json</span>
-								<button class="api-code-copy" onclick="copyText(this, 'shorten-req')">
+								<button class="api-code-copy" onclick="copyCode(this, 'shorten-req')">
 									Copy
 								</button>
 							</div>
