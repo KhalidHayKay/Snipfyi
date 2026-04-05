@@ -22,15 +22,20 @@ func setupRouter() *chi.Mux {
 
 	// Page routes
 	router.Get("/", handler.Home)
+	router.Post("/", handler.HomeShorten)
+
 	router.Get("/shorten", handler.ShortenPage)
+	router.Post("/shorten", handler.ShortenPageShorten)
+
+	router.Get("/stats/{code}", handler.StatsPage)
+
 	router.Get("/api", handler.ApiPage)
 	router.Get("/key/activate", handler.CreateApiKey)
-	router.Get("/stats/{code}", handler.StatsPage)
+
 	router.Get("/{code}", handler.ResolveRedirect)
 	// Note: Specific stats routes should be defined before the catch-all redirect route to avoid conflicts
 
 	// Private API routes (TODO: protect these routes)
-	router.Post("/api/internal/shorten", handler.Shorten)
 	router.Route("/api/internal/key/request", func(r chi.Router) {
 		rateLimiter := limiter.NewRateLimiter(1/60.0, 1)
 		r.Use(rateLimiter.Middleware)

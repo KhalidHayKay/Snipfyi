@@ -20,11 +20,29 @@
 				<code class="code-badge">/stats</code>
 			</p>
 
-			<form id="hero-form">
+			<!-- Error message display -->
+			{{ if .Error }}
+			<div
+				class="error-message"
+				style="
+					margin-bottom: 1.5rem;
+					padding: 1rem;
+					background-color: #ffebee;
+					border: 1px solid #f44336;
+					border-radius: 0.5rem;
+					color: #c62828;
+				"
+			>
+				{{ .Error }}
+			</div>
+			{{ end }}
+
+			<form method="POST" action="/">
 				<div class="hero-bar">
 					<input
 						type="url"
 						name="url"
+						value="{{ if .Data }} {{ .Data.Original }} {{ end }}"
 						placeholder="https://a-very-long-url-you-want-to-shorten.com/…"
 						required
 						autocomplete="off"
@@ -46,7 +64,85 @@
 						</svg>
 					</button>
 				</div>
-				<div id="hero-result" class="hero-result"></div>
+
+				<!-- Result appears here (server-rendered if successful) -->
+				{{ if .Data }}
+				<div class="hero-result show" style="margin-bottom: 10px">
+					<div class="result-tag">Link ready</div>
+					<div class="result-row">
+						<div class="result-url">
+							<a href="{{ .Data.Short }}" target="_blank" rel="noopener"
+								>{{ .Data.Short }}</a
+							>
+						</div>
+						<div class="result-btns">
+							<button
+								type="button"
+								class="btn btn-primary btn-sm"
+								onclick="copyText('{{ .Data.Short }}')"
+							>
+								Copy
+							</button>
+							<a
+								href="{{ .Data.Short }}"
+								class="btn btn-ghost btn-sm"
+								target="_blank"
+								rel="noopener"
+								>Open ↗</a
+							>
+						</div>
+					</div>
+					<div class="result-divider"></div>
+					<div class="result-bottom">
+						<div class="result-qr-wrap">
+							<div class="result-qr-box" id="hero-qr"></div>
+							<button
+								type="button"
+								class="result-qr-dl"
+								onclick="downloadQR('hero-qr', 'smply-qr.png')"
+							>
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.2"
+									stroke-linecap="round"
+								>
+									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+									<polyline points="7 10 12 15 17 10" />
+									<line x1="12" y1="15" x2="12" y2="3" />
+								</svg>
+								Download PNG
+							</button>
+							<script>
+								document.addEventListener('DOMContentLoaded', () => {
+									const qrBox = document.getElementById('hero-qr');
+									const shortLink = qrBox
+										?.closest('.hero-result')
+										?.querySelector('.result-url a')?.href;
+									if (qrBox && shortLink) {
+										generateQR('hero-qr', shortLink);
+									}
+								});
+							</script>
+						</div>
+						<div class="result-stats-col">
+							<span class="result-stats-note">Track clicks at</span>
+							<a
+								href="{{ .Data.Stat }}"
+								class="result-stats-link"
+								target="_blank"
+								rel="noopener"
+							>
+								<svg viewBox="0 0 24 24">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
+								{{ .Data.Stat }}
+							</a>
+						</div>
+					</div>
+				</div>
+				{{ end }}
 			</form>
 
 			<div class="hero-hints">

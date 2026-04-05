@@ -44,14 +44,32 @@
 
 			<!-- Right: form + result -->
 			<div>
+				<!-- Error message display -->
+				{{ if .Error }}
+				<div
+					class="error-message"
+					style="
+						margin-bottom: 1.5rem;
+						padding: 1rem;
+						background-color: #ffebee;
+						border: 1px solid #f44336;
+						border-radius: 0.5rem;
+						color: #c62828;
+					"
+				>
+					{{ .Error }}
+				</div>
+				{{ end }}
+
 				<div class="form-card">
-					<form id="shorten-form">
+					<form method="POST" action="/shorten">
 						<div class="field">
 							<label for="long-url">Long URL</label>
 							<input
 								id="long-url"
 								type="url"
-								name="long_url"
+								name="url"
+								value="{{ if .Data }} {{ .Data.Original }} {{ end }}"
 								placeholder="https://example.com/some/very/long/path?with=query&params=yes"
 								required
 								autocomplete="off"
@@ -103,8 +121,93 @@
 					</form>
 				</div>
 
-				<!-- Result appears here -->
+				<!-- Result appears here (server-rendered if successful) -->
+				{{ if .Data }}
+				<div id="shorten-result" class="shorten-result mt-1 show">
+					<div class="sr-tag"><span class="sr-pulse"></span> Link ready</div>
+					<div class="sr-main">
+						<div class="sr-left">
+							<div class="sr-url">
+								<a href="{{ .Data.Short }}" target="_blank" rel="noopener"
+									>{{ .Data.Short }}</a
+								>
+							</div>
+							<div class="sr-btns">
+								<button
+									type="button"
+									class="btn btn-primary btn-sm"
+									onclick="copyText('{{ .Data.Short }}')"
+								>
+									Copy link
+								</button>
+								<a
+									href="{{ .Data.Short }}"
+									class="btn btn-ghost btn-sm"
+									target="_blank"
+									rel="noopener"
+									>Open ↗</a
+								>
+							</div>
+							<div class="sr-divider"></div>
+							<div class="sr-stats">
+								<div class="sr-stats-note">
+									View analytics at <strong>{{ .Data.Stat }}</strong>
+								</div>
+								<a
+									href="{{ .Data.Stat }}"
+									class="sr-stats-btn"
+									target="_blank"
+									rel="noopener"
+								>
+									<svg
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2.2"
+									>
+										<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+									</svg>
+									/stats
+								</a>
+							</div>
+						</div>
+						<div class="sr-qr-col">
+							<div class="sr-qr-box" id="sr-qr"></div>
+							<button
+								type="button"
+								class="sr-qr-dl"
+								onclick="downloadQR('sr-qr', 'smply-qr.png')"
+							>
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.2"
+									stroke-linecap="round"
+								>
+									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+									<polyline points="7 10 12 15 17 10" />
+									<line x1="12" y1="15" x2="12" y2="3" />
+								</svg>
+								Download QR
+							</button>
+							<script>
+								document.addEventListener('DOMContentLoaded', () => {
+									const qrBox = document.getElementById('sr-qr');
+									const shortLink = qrBox
+										?.closest('.sr-main')
+										?.querySelector('.sr-url a')?.href;
+									if (qrBox && shortLink) {
+										generateQR('sr-qr', shortLink);
+									}
+								});
+							</script>
+						</div>
+					</div>
+				</div>
+				{{ else }}
 				<div id="shorten-result" class="shorten-result mt-1"></div>
+				{{ end }}
 			</div>
 		</div>
 	</div>

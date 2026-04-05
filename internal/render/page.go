@@ -10,6 +10,7 @@ type ViewData struct {
 	Title string
 	Page  string
 	Data  any
+	Error string
 }
 
 // Page renders an HTML template with the given data

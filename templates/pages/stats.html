@@ -104,6 +104,17 @@
 						</svg>
 						Download PNG
 					</button>
+					<script>
+						document.addEventListener('DOMContentLoaded', () => {
+							const qrBox = document.getElementById('stats-qr');
+							const shortLink =
+								document.querySelector('.stats-title em')?.textContent?.trim() ||
+								document.querySelector('.stats-card-value a')?.href;
+							if (qrBox && shortLink) {
+								generateQR('stats-qr', shortLink);
+							}
+						});
+					</script>
 				</div>
 			</div>
 		</div>
