@@ -14,7 +14,7 @@ func setupRouter() *chi.Mux {
 	router := chi.NewRouter()
 
 	// Global middleware
-	router.Use(chiMiddleware.Logger, chiMiddleware.Recoverer)
+	router.Use(middleware.CORSMiddleware, chiMiddleware.Logger, chiMiddleware.Recoverer)
 
 	// Rate limiters
 	keyRequestRateLimiter := limiter.NewRateLimiter(2/60.0, 2)

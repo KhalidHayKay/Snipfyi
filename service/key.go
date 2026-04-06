@@ -115,7 +115,9 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 }
 
 func ValidateAPIKey(ctx context.Context, key string) (bool, error) {
-	keyHash := utils.Hash(key)
+	if key == config.Env.InternalApiKey {
+		return true, nil
+	}
 
 	var exists bool
 
@@ -124,7 +126,7 @@ func ValidateAPIKey(ctx context.Context, key string) (bool, error) {
 			SELECT 1 FROM api_keys
 			WHERE key_hash = $1 AND expires_at > NOW()
 		)
-	`, keyHash).Scan(&exists)
+	`, utils.Hash(key)).Scan(&exists)
 
 	if err != nil {
 		return false, err

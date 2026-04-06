@@ -27,7 +27,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
   redis:
-    image: redis:7
+    image: redis:8-alpine
     container_name: smply-redis
     restart: unless-stopped
     ports:

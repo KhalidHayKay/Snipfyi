@@ -172,8 +172,8 @@ input {
 	flex-shrink: 0;
 }
 .logo-mark {
-	width: 27px;
-	height: 27px;
+	width: 25px;
+	height: 25px;
 	margin-right: 7px;
 	background: var(--ink);
 	border-radius: 7px;
@@ -182,13 +182,7 @@ input {
 	justify-content: center;
 	flex-shrink: 0;
 }
-.logo-mark svg {
-	width: 14px;
-	height: 14px;
-	stroke: white;
-	fill: none;
-	stroke-width: 2.3;
-}
+
 .logo-tld {
 	color: var(--blue);
 }
