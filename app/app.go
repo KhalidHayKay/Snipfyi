@@ -7,13 +7,14 @@ import (
 )
 
 func Start() {
-	router := setupRouter()
+	config.LoadEnv()
 
-	port := config.Env.App.Port
-	if port == "" && config.Env.App.Environment == "development" {
-		port = "8000"
+	if err := config.InitDB(); err != nil {
+		log.Fatal(err)
 	}
 
-	log.Printf("Starting server on port %s in %s mode", port, config.Env.App.Environment)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	router := setupRouter()
+
+	log.Println("Starting server...")
+	log.Fatal(http.ListenAndServe(":"+config.Env.App.Port, router))
 }

@@ -49,7 +49,7 @@ func LoadEnv() {
 	Env = &EnvType{
 		App: AppConfig{
 			Environment: os.Getenv("APP_ENV"),
-			Port:        os.Getenv("PORT"),
+			Port:        os.Getenv("APP_PORT"),
 			Url:         os.Getenv("APP_URL"),
 		},
 
