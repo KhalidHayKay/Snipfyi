@@ -5,6 +5,10 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.dev
+      args:
+        APP_ENV: ${APP_ENV}
+    env_file:
+      - ../.env
     image: smply-app
     container_name: smply-app
     restart: unless-stopped

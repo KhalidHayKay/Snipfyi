@@ -1,15 +1,20 @@
-FROM golang:1.25-alpine AS builder
-
+kFROM golang:1.25-alpine
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+
+ARG APP_ENV
+
+RUN if [ "$APP_ENV" = "development" ]; then \
+      go install github.com/air-verse/air@latest; \
+    fi
 
 COPY . .
-RUN go build -o app ./cmd/api
 
-FROM alpine:latest
+RUN if [ "$APP_ENV" != "development" ]; then \
+      go build -o main .; \
+    fi
 
-WORKDIR /app
-COPY --from=builder /app/app .
-
-CMD ["./app"]
+CMD if [ "$APP_ENV" = "development" ]; then \
+      air; \
+    else \
+      ./main; \
+    fi
