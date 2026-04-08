@@ -20,10 +20,6 @@ func setupRouter() *chi.Mux {
 	keyRequestRateLimiter := limiter.NewRateLimiter(2/60.0, 2)
 	publicAPIRateLimiter := limiter.NewRateLimiter(10/60.0, 10)
 
-	// Static files
-	files := http.FileServer(http.Dir("./public"))
-	router.Handle("/static/*", http.StripPrefix("/static/", files))
-
 	// Page routes
 	router.Get("/", handler.Home)
 	router.Post("/", handler.HomeShorten)
@@ -50,6 +46,15 @@ func setupRouter() *chi.Mux {
 		r.Get("/stats/{code}", handler.Stats)
 		r.Get("/redirect/{code}", handler.Redirect)
 	})
+
+	// Static files
+	publicFiles := http.FileServer(http.Dir("./public"))
+	staticFiles := http.FileServer(http.Dir("./static"))
+
+	router.Handle("/robots.txt", publicFiles)
+	router.Handle("/sitemap.xml", publicFiles)
+	router.Handle("/favicon.ico", publicFiles)
+	router.Handle("/static/*", http.StripPrefix("/static/", staticFiles))
 
 	return router
 }
