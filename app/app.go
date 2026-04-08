@@ -13,6 +13,10 @@ func Start() {
 		log.Fatal(err)
 	}
 
+	if err := config.InitCache(); err != nil {
+		log.Fatal(err)
+	}
+
 	router := setupRouter()
 
 	log.Println("Starting server...")

@@ -4,3 +4,5 @@
 *.env
 !.env.example
 tmp
+
+compose.override.yaml

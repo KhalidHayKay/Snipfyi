@@ -1,21 +1,16 @@
-# version: "3.9"
-
 services:
   app:
     build:
-      context: ../
-      dockerfile: docker/Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile
       args:
         APP_ENV: ${APP_ENV}
     env_file:
-      - ../.env
+      - .env
     image: smply-app
     container_name: smply-app
     restart: unless-stopped
     working_dir: /app/
-    volumes:
-      - ../:/app
-      - go-module-cache:/root/go/pkg/mod
     ports:
       - "8000:8000"
   db:
