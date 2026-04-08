@@ -13,7 +13,6 @@ type Limiter struct {
 	burst     float64
 	tokens    float64
 	lastCheck time.Time
-	mu        sync.Mutex
 }
 
 func NewLimiter(rate, burst float64) *Limiter {
@@ -26,9 +25,6 @@ func NewLimiter(rate, burst float64) *Limiter {
 }
 
 func (l *Limiter) Allow() bool {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
 	elapsed := time.Since(l.lastCheck).Seconds()
 	l.tokens += elapsed * l.rate
 	if l.tokens > l.burst {
@@ -54,20 +50,9 @@ type RateLimiter struct {
 
 func NewRateLimiter(rate, burst float64) *RateLimiter {
 	return &RateLimiter{
-		limiters: make(map[string]*Limiter),
-		rate:     rate,
-		burst:    burst,
+		rate:  rate,
+		burst: burst,
 	}
-}
-
-func (rl *RateLimiter) getLimiter(key string) *Limiter {
-	rl.mu.Lock()
-	defer rl.mu.Unlock()
-
-	if _, exists := rl.limiters[key]; !exists {
-		rl.limiters[key] = NewLimiter(rl.rate, rl.burst)
-	}
-	return rl.limiters[key]
 }
 
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
@@ -77,7 +62,10 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			key = utils.GetClientIP(r)
 		}
 
-		if !rl.getLimiter(key).Allow() {
+		limiter, _ := loadLimiter(r.Context(), key, rl.rate, rl.burst)
+		defer saveLimiter(r.Context(), key, limiter)
+
+		if !limiter.Allow() {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
 			json.NewEncoder(w).Encode(map[string]string{
