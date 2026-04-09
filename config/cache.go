@@ -14,8 +14,8 @@ func InitCache() error {
 	defer cancel()
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "admin",
+		Addr:     Env.Redis.Url,
+		Password: Env.Redis.Password,
 		DB:       0,
 	})
 
