@@ -31,8 +31,6 @@ type RedisConfig struct {
 type EnvType struct {
 	App AppConfig
 
-	InternalApiKey string
-
 	DbUrl string
 
 	Mailer MailerConfig
@@ -59,8 +57,6 @@ func LoadEnv() {
 			Port:        os.Getenv("APP_PORT"),
 			Url:         os.Getenv("APP_URL"),
 		},
-
-		InternalApiKey: os.Getenv("INTERNAL_API_KEY"),
 
 		DbUrl: os.Getenv("DB_URL"),
 

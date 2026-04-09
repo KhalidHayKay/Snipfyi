@@ -29,7 +29,6 @@ func sendMagicLinkEmail(email string, token string) {
 		"MagicLink": fmt.Sprintf("%s/key/activate?token=%s", config.Env.App.Url, token),
 		"ExpiresIn": "15 minutes",
 		"AppUrl":    config.Env.App.Url,
-		// "RequestIP": r.RemoteAddr,
 	}
 
 	// 2. Render the template with dynamic data into a buffer
