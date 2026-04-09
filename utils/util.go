@@ -14,9 +14,9 @@ func IsValidURL(raw string) bool {
 	}
 
 	// require http or https
-	// if u.Scheme != "http" && u.Scheme != "https" {
-	// 	return false
-	// }
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
 
 	// must have a host
 	if u.Host == "" {
