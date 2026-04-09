@@ -115,10 +115,6 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 }
 
 func ValidateAPIKey(ctx context.Context, key string) (bool, error) {
-	if key == config.Env.InternalApiKey {
-		return true, nil
-	}
-
 	var exists bool
 
 	err := config.DB.QueryRow(ctx, `

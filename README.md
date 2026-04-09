@@ -113,7 +113,7 @@ The Dockerfile detects `APP_ENV` at build time: in production it compiles the Go
 
 ```
 POST /api/shorten
-Authorization: Bearer <your-api-key>
+X-API-Key: <your-api-key>
 Content-Type: application/json
 
 {
