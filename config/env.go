@@ -23,6 +23,11 @@ type MailerConfig struct {
 	From string
 }
 
+type RedisConfig struct {
+	Url      string
+	Password string
+}
+
 type EnvType struct {
 	App AppConfig
 
@@ -31,6 +36,8 @@ type EnvType struct {
 	DbUrl string
 
 	Mailer MailerConfig
+
+	Redis RedisConfig
 }
 
 var Env *EnvType
@@ -63,6 +70,11 @@ func LoadEnv() {
 			User: os.Getenv("MAILER_USER"),
 			Pass: os.Getenv("MAILER_PASS"),
 			From: os.Getenv("MAILER_FROM"),
+		},
+
+		Redis: RedisConfig{
+			Url:      os.Getenv("REDIS_URL"),
+			Password: os.Getenv("REDIS_PASSWORD"),
 		},
 	}
 	if Env.App.Url == "" || Env.DbUrl == "" {
