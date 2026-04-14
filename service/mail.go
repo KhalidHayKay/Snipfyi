@@ -10,7 +10,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func sendMagicLinkEmail(email string, token string) {
+func SendMagicLinkEmail(email string, token string) error {
 	dailer := gomail.NewDialer(
 		config.Env.Mailer.Host,
 		config.Env.Mailer.Port,
@@ -18,10 +18,10 @@ func sendMagicLinkEmail(email string, token string) {
 		config.Env.Mailer.Pass,
 	)
 
-	// 1. Parse the HTML template file
 	t, err := template.ParseFiles("templates/emails/magic-link.html")
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	data := map[string]any{
@@ -34,7 +34,8 @@ func sendMagicLinkEmail(email string, token string) {
 	// 2. Render the template with dynamic data into a buffer
 	var body bytes.Buffer
 	if err := t.Execute(&body, data); err != nil {
-		log.Fatal(err)
+		log.Printf("Error executing template: %v", err)
+		return err
 	}
 
 	message := gomail.NewMessage()
@@ -45,7 +46,9 @@ func sendMagicLinkEmail(email string, token string) {
 
 	if err := dailer.DialAndSend(message); err != nil {
 		log.Printf("Failed to send email: %v", err)
-	} else {
-		log.Printf("Magic link email sent to %s", email)
+		return err
 	}
+
+	log.Printf("Magic link email sent to %s", email)
+	return nil
 }

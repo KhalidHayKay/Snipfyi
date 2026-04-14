@@ -2,5 +2,5 @@
 if [ "$APP_ENV" = "development" ]; then
     exec air
 else
-    exec ./main
+    exec ./cmd/web/main
 fi
