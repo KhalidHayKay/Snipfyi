@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"log"
 	"smply/config"
+	"smply/internal/queue"
 	"smply/model"
 	"smply/utils"
 )
@@ -40,9 +42,10 @@ func RequestApiKey(ctx context.Context, email string) error {
 		return err
 	}
 
-	go func() {
-		sendMagicLinkEmail(email, token)
-	}()
+	err = queue.EnqueueAPIKeyMagicLinkEmail(ctx, email, token)
+	if err != nil {
+		log.Printf("failed to enqueue email: %v", err)
+	}
 
 	return nil
 }

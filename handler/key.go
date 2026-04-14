@@ -27,7 +27,13 @@ func RequestApiKey(w http.ResponseWriter, r *http.Request) {
 	err := service.RequestApiKey(r.Context(), email)
 	if err != nil {
 		log.Println(err)
+
 		data.Error = "Failed to process request"
+
+		if err.Error() == "mailer error" {
+			data.Error = "Unable to send email, please try again"
+		}
+
 		render.Page(w, "api.html", data)
 		return
 	}

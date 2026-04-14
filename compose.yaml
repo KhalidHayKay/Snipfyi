@@ -13,6 +13,16 @@ services:
     working_dir: /app/
     ports:
       - "8000:8000"
+  worker:
+    image: smply-app
+    container_name: smply-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    entrypoint: ["/bin/sh", "-c", "exec sh start.worker.sh"]
+    depends_on:
+      - db
+      - redis
   db:
     image: postgres:16
     container_name: smply-db
