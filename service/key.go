@@ -83,11 +83,11 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 
 	// Revoke existing API keys for this email
 	_, err = config.DB.Exec(ctx, `
-		UPDATE api_keys
-		SET expires_at = NOW()
+		DELETE FROM api_keys
 		WHERE owner_email = $1
 	`, magicToken.Email)
 	if err != nil {
+		log.Printf("error deleting existing API key: %v", err)
 		return "", err
 	}
 
@@ -111,6 +111,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 	)
 
 	if err != nil {
+		log.Printf("error creating API key: %v", err)
 		return "", err
 	}
 

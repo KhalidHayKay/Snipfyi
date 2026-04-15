@@ -1,4 +1,4 @@
-# Smply — API-First URL Shortener
+# Smply — URL Shortener
 
 A production-style URL shortener built in Go, featuring a public API, email-based API key authentication, rate limiting, and background job support.
 
@@ -63,6 +63,10 @@ Create `compose.override.yaml` in the project root:
 services:
  app:
   volumes:
+   - ./:/app
+   - go-module-cache:/root/go/pkg/mod
+  worker:
+    volumes:
    - ./:/app
    - go-module-cache:/root/go/pkg/mod
 
