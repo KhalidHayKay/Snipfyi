@@ -1,7 +1,8 @@
-package config
+package storage
 
 import (
 	"context"
+	"smply/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,8 +15,8 @@ func InitCache() error {
 	defer cancel()
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     Env.Redis.Url,
-		Password: Env.Redis.Password,
+		Addr:     config.Env.Redis.Url,
+		Password: config.Env.Redis.Password,
 		DB:       0,
 	})
 

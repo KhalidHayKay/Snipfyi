@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"smply/config"
+	"smply/internal/storage"
 	"smply/model"
 	"smply/utils"
 )
@@ -14,7 +14,7 @@ func StoreUrl(ctx context.Context, url string, short string) (model.Url, error) 
 		return saved, nil
 	}
 
-	tx, err := config.DB.Begin(ctx)
+	tx, err := storage.DB.Begin(ctx)
 	if err != nil {
 		return model.Url{}, err
 	}

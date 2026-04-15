@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"smply/config"
 	"smply/internal/queue"
+	"smply/internal/storage"
 	"smply/internal/tasks"
 	"smply/internal/worker"
 
@@ -14,11 +15,11 @@ import (
 func Start() {
 	config.LoadEnv()
 
-	if err := config.InitDB(); err != nil {
+	if err := storage.InitDB(); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := config.InitCache(); err != nil {
+	if err := storage.InitCache(); err != nil {
 		log.Fatal(err)
 	}
 

@@ -2,14 +2,14 @@ package service
 
 import (
 	"context"
-	"smply/config"
+	"smply/internal/storage"
 	"smply/model"
 )
 
 func GetByShort(ctx context.Context, short string) (model.Url, error) {
 	var url model.Url
 
-	err := config.DB.QueryRow(
+	err := storage.DB.QueryRow(
 		ctx,
 		`SELECT id, original, short FROM urls WHERE short = $1`,
 		short).Scan(
@@ -29,7 +29,7 @@ func GetByShort(ctx context.Context, short string) (model.Url, error) {
 func GetByOriginal(ctx context.Context, originalUrl string) (model.Url, error) {
 	var url model.Url
 
-	err := config.DB.QueryRow(
+	err := storage.DB.QueryRow(
 		ctx,
 		`SELECT id, original, short FROM urls WHERE original = $1`,
 		originalUrl).Scan(

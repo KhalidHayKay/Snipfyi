@@ -3,8 +3,8 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"smply/internal/service"
 	"smply/internal/tasks"
-	"smply/service"
 
 	"github.com/hibiken/asynq"
 )

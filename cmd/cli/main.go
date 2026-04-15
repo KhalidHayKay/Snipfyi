@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"smply/config"
+	"smply/internal/storage"
 	"strings"
 )
 
@@ -42,7 +43,7 @@ func clearDB() {
 	}
 
 	config.LoadEnv()
-	if err := config.InitDB(); err != nil {
+	if err := storage.InitDB(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -53,7 +54,7 @@ func clearDB() {
 	for _, table := range tables {
 		query := fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", table)
 
-		_, err := config.DB.Exec(ctx, query)
+		_, err := storage.DB.Exec(ctx, query)
 		if err != nil {
 			log.Printf("Error dropping table %s: %v", table, err)
 			continue

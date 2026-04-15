@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"smply/internal/render"
-	"smply/service"
+	"smply/internal/service"
 	"text/template"
 
 	"github.com/jackc/pgx/v5"

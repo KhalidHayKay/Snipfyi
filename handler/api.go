@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"smply/internal/render"
-	"smply/service"
+	"smply/internal/service"
 	"smply/utils"
 	"strings"
 
