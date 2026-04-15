@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 	"log"
-	"smply/config"
 	"smply/internal/queue"
+	"smply/internal/storage"
 	"smply/model"
 	"smply/utils"
 )
 
 func RequestApiKey(ctx context.Context, email string) error {
-	_, err := config.DB.Exec(ctx, `
+	_, err := storage.DB.Exec(ctx, `
 		UPDATE magic_tokens
 		SET used_at = NOW()
 		WHERE email = $1
@@ -28,7 +28,7 @@ func RequestApiKey(ctx context.Context, email string) error {
 
 	var magicToken model.MagicToken
 
-	err = config.DB.QueryRow(ctx, `
+	err = storage.DB.QueryRow(ctx, `
 		INSERT INTO magic_tokens (email, token_hash, expires_at, created_at)
 		VALUES ($1, $2, NOW() + INTERVAL '15 minutes', NOW())
 		RETURNING id, email, token_hash, expires_at
@@ -55,7 +55,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 
 	var magicToken model.MagicToken
 
-	err := config.DB.QueryRow(ctx, `
+	err := storage.DB.QueryRow(ctx, `
 		SELECT id, email, token_hash, expires_at
 		FROM magic_tokens
 		WHERE token_hash = $1 
@@ -72,7 +72,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 	}
 
 	// Mark magic link Token as used
-	_, err = config.DB.Exec(ctx, `
+	_, err = storage.DB.Exec(ctx, `
 		UPDATE magic_tokens
 		SET used_at = NOW()
 		WHERE id = $1
@@ -82,12 +82,12 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 	}
 
 	// Revoke existing API keys for this email
-	_, err = config.DB.Exec(ctx, `
-		UPDATE api_keys
-		SET expires_at = NOW()
+	_, err = storage.DB.Exec(ctx, `
+		DELETE FROM api_keys
 		WHERE owner_email = $1
 	`, magicToken.Email)
 	if err != nil {
+		log.Printf("error deleting existing API key: %v", err)
 		return "", err
 	}
 
@@ -98,7 +98,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 
 	var apiKey model.APIKey
 
-	err = config.DB.QueryRow(ctx, `
+	err = storage.DB.QueryRow(ctx, `
 		INSERT INTO api_keys (owner_email, key_hash, created_at, expires_at)
 		VALUES ($1, $2, NOW(), NOW() + INTERVAL '30 days')
 		RETURNING id, owner_email, key_hash, created_at, expires_at
@@ -111,6 +111,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 	)
 
 	if err != nil {
+		log.Printf("error creating API key: %v", err)
 		return "", err
 	}
 
@@ -120,7 +121,7 @@ func CreateApiKey(ctx context.Context, token string) (string, error) {
 func ValidateAPIKey(ctx context.Context, key string) (bool, error) {
 	var exists bool
 
-	err := config.DB.QueryRow(ctx, `
+	err := storage.DB.QueryRow(ctx, `
 		SELECT EXISTS (
 			SELECT 1 FROM api_keys
 			WHERE key_hash = $1 AND expires_at > NOW()

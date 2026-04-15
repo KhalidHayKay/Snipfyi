@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
+	"smply/internal/queue"
 	"smply/internal/render"
+	"smply/internal/service"
 	"smply/model"
-	"smply/service"
 	"smply/utils"
 	"strings"
 	"time"
@@ -93,11 +93,13 @@ func ApiPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResolveRedirect(w http.ResponseWriter, r *http.Request) {
-	code := chi.URLParam(r, "code")
+	alias := chi.URLParam(r, "alias")
 
-	url, err := service.GetByShort(r.Context(), code)
+	url, err := service.GetByAlias(r.Context(), alias)
 
 	if err != nil {
+		log.Println(err)
+
 		if err == pgx.ErrNoRows {
 			render.ErrorPage(w, http.StatusNotFound, "Not found")
 			return
@@ -107,24 +109,27 @@ func ResolveRedirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		err := service.RunStats(ctx, url.Id)
-
-		if err != nil {
-			log.Println(err)
-		}
-	}()
+	// stats update called here because redirect might now happen in `GetByAlias` call.
+	// For example in API call.
+	err = queue.EnqueueStatsUpdate(
+		r.Context(),
+		url.Alias,
+		r.Referer(),
+		r.UserAgent(),
+		"", //utils.GetIPAddress(r),
+		time.Now(),
+	)
+	if err != nil {
+		log.Println(err)
+	}
 
 	http.Redirect(w, r, url.Original, http.StatusFound)
 }
 
 func StatsPage(w http.ResponseWriter, r *http.Request) {
-	code := chi.URLParam(r, "code")
+	alias := chi.URLParam(r, "alias")
 
-	stat, err := service.GetStats(r.Context(), code)
+	stat, err := service.GetStats(r.Context(), alias)
 	if err != nil {
 		log.Println(err)
 		render.ErrorPage(w, http.StatusNotFound, "Not found")

@@ -27,14 +27,14 @@ func setupRouter() *chi.Mux {
 	router.Get("/shorten", handler.ShortenPage)
 	router.Post("/shorten", handler.ShortenPageShorten)
 
-	router.Get("/stats/{code}", handler.StatsPage)
+	router.Get("/stats/{alias}", handler.StatsPage)
 
 	router.Get("/api", handler.ApiPage)
 	router.With(keyRequestRateLimiter.Middleware).Post("/api", handler.RequestApiKey)
 
 	router.Get("/key/activate", handler.CreateApiKey)
 
-	router.Get("/{code}", handler.ResolveRedirect)
+	router.Get("/{alias}", handler.ResolveRedirect)
 	// Note: Specific stats routes should be defined before the catch-all redirect route to avoid conflicts
 
 	// Public API routes with rate limiting and key validation
@@ -43,8 +43,8 @@ func setupRouter() *chi.Mux {
 		r.Use(middleware.RequireKey)
 
 		r.Post("/shorten", handler.Shorten)
-		r.Get("/stats/{code}", handler.Stats)
-		r.Get("/redirect/{code}", handler.Redirect)
+		r.Get("/stats/{alias}", handler.Stats)
+		r.Get("/redirect/{alias}", handler.Redirect)
 	})
 
 	// Static files

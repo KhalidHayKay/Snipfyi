@@ -2,19 +2,19 @@ package service
 
 import (
 	"context"
-	"smply/config"
+	"smply/internal/storage"
 	"smply/model"
 	"smply/utils"
 )
 
-func StoreUrl(ctx context.Context, url string, short string) (model.Url, error) {
+func StoreUrl(ctx context.Context, url string, alias string) (model.Url, error) {
 	saved, _ := GetByOriginal(ctx, url)
 
 	if (saved != model.Url{}) {
 		return saved, nil
 	}
 
-	tx, err := config.DB.Begin(ctx)
+	tx, err := storage.DB.Begin(ctx)
 	if err != nil {
 		return model.Url{}, err
 	}
@@ -28,22 +28,22 @@ func StoreUrl(ctx context.Context, url string, short string) (model.Url, error) 
 	var id int64
 	err = tx.QueryRow(
 		ctx,
-		`INSERT INTO urls (original, short) VALUES ($1, $2) RETURNING id`,
+		`INSERT INTO urls (original, alias) VALUES ($1, $2) RETURNING id`,
 		url,
-		short,
+		alias,
 	).Scan(&id)
 	if err != nil {
 		return model.Url{}, err
 	}
 
-	if short == "" {
-		short = utils.EncodeWithPadding(id, 2)
+	if alias == "" {
+		alias = utils.EncodeWithPadding(id, 2)
 	}
 
 	_, err = tx.Exec(
 		ctx,
-		`UPDATE urls SET short = $1 WHERE id = $2`,
-		short,
+		`UPDATE urls SET alias = $1 WHERE id = $2`,
+		alias,
 		id,
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func StoreUrl(ctx context.Context, url string, short string) (model.Url, error) 
 	result := model.Url{
 		Id:       id,
 		Original: url,
-		Short:    short,
+		Alias:    alias,
 	}
 
 	result.BuildUrls()

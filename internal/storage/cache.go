@@ -1,7 +1,8 @@
-package config
+package storage
 
 import (
 	"context"
+	"smply/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,18 +14,17 @@ func InitCache() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     Env.Redis.Url,
-		Password: Env.Redis.Password,
+	Cache = redis.NewClient(&redis.Options{
+		Addr:     config.Env.Redis.Url,
+		Password: config.Env.Redis.Password,
 		DB:       0,
 	})
 
-	_, err := rdb.Ping(ctx).Result()
+	_, err := Cache.Ping(ctx).Result()
 	if err != nil {
-		rdb.Close()
+		Cache.Close()
 		return err
 	}
 
-	Cache = rdb
 	return nil
 }
