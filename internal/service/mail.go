@@ -20,7 +20,7 @@ func SendMagicLinkEmail(email string, token string) error {
 
 	t, err := template.ParseFiles("templates/emails/magic-link.html")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Failed to parse email template: %v", err)
 		return err
 	}
 
@@ -45,7 +45,7 @@ func SendMagicLinkEmail(email string, token string) error {
 	message.SetBody("text/html", body.String())
 
 	if err := dailer.DialAndSend(message); err != nil {
-		log.Printf("Failed to send email: %v", err)
+		log.Printf("Failed to send magic link email to %s: %v", email, err)
 		return err
 	}
 

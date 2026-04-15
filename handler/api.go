@@ -65,9 +65,9 @@ func Stats(w http.ResponseWriter, r *http.Request) {
 }
 
 func Redirect(w http.ResponseWriter, r *http.Request) {
-	code := chi.URLParam(r, "code")
+	alias := chi.URLParam(r, "alias")
 
-	stat, err := service.GetByShort(r.Context(), code)
+	stat, err := service.GetByAlias(r.Context(), alias)
 
 	if err != nil {
 		log.Println(err)

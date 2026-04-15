@@ -31,7 +31,7 @@ func GetByOriginal(ctx context.Context, originalUrl string) (model.Url, error) {
 
 	err := storage.DB.QueryRow(
 		ctx,
-		`SELECT id, original, alias FROM urls WHERE original = $1`,
+		`SELECT id, original, short FROM urls WHERE original = $1`,
 		originalUrl).Scan(
 		&url.Id,
 		&url.Original,

@@ -9,23 +9,24 @@ import (
 type Url struct {
 	Id          int64      `json:"id"`
 	Original    string     `json:"original"`
-	Short       string     `json:"short"`
-	Stat        string     `json:"stat"`
+	Alias       string     `json:"alias"`
+	ShortUrl    string     `json:"short_url"`
+	StatUrl     string     `json:"stat_url"`
 	Visited     int64      `json:"visited"`
 	Created     time.Time  `json:"created"`
 	LastVisited *time.Time `json:"last_visited"`
 }
 
 func (u *Url) BuildUrls() {
-	code := u.Short // save code before overwriting
-	u.Short = fmt.Sprintf("%s/%s", config.Env.App.Url, code)
-	u.Stat = fmt.Sprintf("%s/stats/%s", config.Env.App.Url, code)
+	u.ShortUrl = fmt.Sprintf("%s/%s", config.Env.App.Url, u.Alias)
+	u.StatUrl = fmt.Sprintf("%s/stats/%s", config.Env.App.Url, u.Alias)
 }
 
 type ClickEvent struct {
 	Id        int64     `json:"id"`
-	LinkId    int64     `json:"link_id"`
-	Timestamp time.Time `json:"timestamp"`
+	UrlId     int64     `json:"link_id"`
 	Referrer  string    `json:"referrer"`
 	UserAgent string    `json:"user_agent"`
+	IpAddress string    `json:"ip_address"`
+	Timestamp time.Time `json:"timestamp"`
 }

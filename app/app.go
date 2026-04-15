@@ -34,6 +34,10 @@ func Start() {
 func StartWorker() {
 	config.LoadEnv()
 
+	if err := storage.InitDB(); err != nil {
+		log.Fatal(err)
+	}
+
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{
 			Addr:     config.Env.Redis.Url,
@@ -44,12 +48,15 @@ func StartWorker() {
 			Concurrency: 10,
 			Queues: map[string]int{
 				"critical": 10,
+				"default":  5,
+				"low":      1,
 			},
 		},
 	)
 
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeAPIKeyMagicLinkEmail, worker.HandleAPIKeyMagicLinkEmail)
+	mux.HandleFunc(tasks.TypeStatsUpdate, worker.HandleStatsUpdate)
 
 	if err := srv.Run(mux); err != nil {
 		log.Fatal(err)

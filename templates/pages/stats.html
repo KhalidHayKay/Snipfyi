@@ -13,7 +13,7 @@
 
 			<div class="stats-kicker">Link Stats</div>
 			<h1 class="stats-title">
-				<em>{{ .Data.Stats.Short }}</em>
+				<em>{{ .Data.Stats.ShortUrl }}</em>
 			</h1>
 			<div class="stats-created">
 				Created {{ .Data.Stats.Created.Format "Jan 2, 2006" }} · {{
@@ -38,9 +38,8 @@
 				<div class="stats-card">
 					<div class="stats-card-label">Short URL</div>
 					<div class="stats-card-value">
-						<a href="{{ .Data.Stats.Short }}" target="_blank" rel="noopener"
-							>{{ .Data.Stats.Short }}</a
-						>
+						<a href="{{ .Data.Stats.ShortUrl }}" target="_blank" rel="noopener">{{ .Data.Stats.ShortUrl
+							}}</a>
 					</div>
 				</div>
 
@@ -67,12 +66,8 @@
 				<div class="stats-card stats-card-full">
 					<div class="stats-card-label">Original URL</div>
 					<div class="stats-card-value mono">
-						<a
-							href="{{ .Data.Stats.Original }}"
-							target="_blank"
-							rel="noopener"
-							title="{{ .Data.Stats.Original }}"
-						>
+						<a href="{{ .Data.Stats.Original }}" target="_blank" rel="noopener"
+							title="{{ .Data.Stats.Original }}">
 							{{ .Data.Stats.Original }}
 						</a>
 					</div>
@@ -85,19 +80,9 @@
 				<div class="stats-qr-info">
 					<h4>QR Code</h4>
 					<p>Scan to visit the short link, or download to use offline.</p>
-					<button
-						class="btn btn-ghost btn-sm"
-						onclick="downloadQR('stats-qr', 'smply-qr.png')"
-					>
-						<svg
-							width="13"
-							height="13"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2.2"
-							stroke-linecap="round"
-						>
+					<button class="btn btn-ghost btn-sm" onclick="downloadQR('stats-qr', 'smply-qr.png')">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.2" stroke-linecap="round">
 							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 							<polyline points="7 10 12 15 17 10" />
 							<line x1="12" y1="15" x2="12" y2="3" />
