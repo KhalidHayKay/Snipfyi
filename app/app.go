@@ -57,6 +57,7 @@ func StartWorker() {
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeAPIKeyMagicLinkEmail, worker.HandleAPIKeyMagicLinkEmail)
 	mux.HandleFunc(tasks.TypeStatsUpdate, worker.HandleStatsUpdate)
+	mux.HandleFunc(tasks.TypeAdminLoginMagicLinkEmail, worker.HandleAdminLoginMagicLinkEmail)
 
 	if err := srv.Run(mux); err != nil {
 		log.Fatal(err)

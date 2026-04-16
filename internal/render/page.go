@@ -15,6 +15,8 @@ type ViewData struct {
 
 // Page renders an HTML template with the given data
 func Page(w http.ResponseWriter, page string, data ViewData) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	t, err := template.ParseFiles(
 		"templates/layouts/layout.html",
 		"templates/pages/"+page,
@@ -25,8 +27,24 @@ func Page(w http.ResponseWriter, page string, data ViewData) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := t.ExecuteTemplate(w, "layout", data); err != nil {
+		log.Printf("ERROR: Failed to execute template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func SinglePage(w http.ResponseWriter, page string, data ViewData) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	t, err := template.ParseFiles("templates/pages/" + page)
+	if err != nil {
+		log.Printf("ERROR: Failed to parse template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := t.Execute(w, data); err != nil {
 		log.Printf("ERROR: Failed to execute template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("Expected command: db:drop | db:create | db:seed")
+		log.Fatal("Expected command: db:drop | db:migrate | db:seed")
 	}
 
 	config.LoadEnv()
@@ -26,8 +26,8 @@ func main() {
 	switch os.Args[1] {
 	case "db:drop":
 		clearDB()
-	case "db:create":
-		createDB(ctx)
+	case "db:migrate":
+		migrateDB(ctx)
 	case "db:seed":
 		seedDB()
 	default:
@@ -40,7 +40,7 @@ func seedDB() {
 	// your seed logic here
 }
 
-func createDB(ctx context.Context) {
+func migrateDB(ctx context.Context) {
 	_, err := storage.DB.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS urls (
 			id SERIAL PRIMARY KEY,

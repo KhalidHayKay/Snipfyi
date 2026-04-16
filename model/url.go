@@ -25,7 +25,7 @@ func (u *Url) BuildUrls() {
 type ClickEvent struct {
 	Id        int64     `json:"id"`
 	UrlId     int64     `json:"link_id"`
-	Referrer  string    `json:"referrer"`
+	Referer   string    `json:"referer"`
 	UserAgent string    `json:"user_agent"`
 	IpAddress string    `json:"ip_address"`
 	Timestamp time.Time `json:"timestamp"`

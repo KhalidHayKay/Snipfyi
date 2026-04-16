@@ -10,6 +10,7 @@ import (
 )
 
 type AppConfig struct {
+	Name        string
 	Environment string
 	Port        string
 	Url         string
@@ -36,6 +37,8 @@ type EnvType struct {
 	Mailer MailerConfig
 
 	Redis RedisConfig
+
+	AdminEmail string
 }
 
 var Env *EnvType
@@ -53,6 +56,7 @@ func LoadEnv() {
 
 	Env = &EnvType{
 		App: AppConfig{
+			Name:        os.Getenv("APP_NAME"),
 			Environment: os.Getenv("APP_ENV"),
 			Port:        os.Getenv("APP_PORT"),
 			Url:         os.Getenv("APP_URL"),
@@ -72,6 +76,8 @@ func LoadEnv() {
 			Url:      os.Getenv("REDIS_URL"),
 			Password: os.Getenv("REDIS_PASSWORD"),
 		},
+
+		AdminEmail: os.Getenv("ADMIN_EMAIL"),
 	}
 	if Env.App.Url == "" || Env.DbUrl == "" {
 		log.Println(errors.New("APP_URL or DB_URL not set"))
