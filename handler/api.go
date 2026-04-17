@@ -51,9 +51,9 @@ func Shorten(w http.ResponseWriter, r *http.Request) {
 }
 
 func Stats(w http.ResponseWriter, r *http.Request) {
-	code := chi.URLParam(r, "code")
+	alias := chi.URLParam(r, "alias")
 
-	stat, err := service.GetStats(r.Context(), code)
+	stat, err := service.GetStats(r.Context(), alias)
 
 	if err != nil {
 		log.Println(err)
@@ -64,10 +64,10 @@ func Stats(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, http.StatusOK, stat)
 }
 
-func Redirect(w http.ResponseWriter, r *http.Request) {
+func RedirectAPI(w http.ResponseWriter, r *http.Request) {
 	alias := chi.URLParam(r, "alias")
 
-	stat, err := service.GetByAlias(r.Context(), alias)
+	url, err := service.GetByAlias(r.Context(), alias)
 
 	if err != nil {
 		log.Println(err)
@@ -75,5 +75,5 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, http.StatusOK, stat)
+	render.JSON(w, http.StatusOK, url)
 }

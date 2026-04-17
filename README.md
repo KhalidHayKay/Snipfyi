@@ -1,6 +1,12 @@
 # Smply — URL Shortener
 
-A production-style URL shortener built in Go, featuring a public API, email-based API key authentication, rate limiting, and background job support.
+A simple URL shortener built in Go, featuring a public API, a web interface for shortening URLs, email-based API key authentication, rate limiting, and background job support.
+
+---
+
+## 🌍 Try it Live
+
+[https://smply.cc](https://smply.cc)
 
 ---
 
@@ -15,28 +21,30 @@ A production-style URL shortener built in Go, featuring a public API, email-base
 
 1. Request access via email on the `/api` page
 2. Receive a magic link (valid for 15 minutes, single-use)
-3. Click the link to activate and receive your API key (shown once — store it)
-4. Pass the key as an `Authorization` header on API requests
+3. Click the link to activate and receive your API key (shown once)
+4. Pass the key as an `X-API-Key` header on API requests
 
 ---
 
-## Tech Stack
+## Architecture
 
-- **Language:** Go
-- **Database:** PostgreSQL
-- **Cache / Rate limiting:** Redis
-- **Container:** Docker + Docker Compose
+The application is split into:
+
+- **API server** — request handling, routing, authentication
+- **Worker** — background jobs (e.g. email delivery)
+- **Redis** — rate limiting and caching
+- **PostgreSQL** — persistent storage
 
 ---
 
-## Prerequisites
+## Local Development Setup
+
+### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 - Go 1.25+ (only if running outside Docker)
 
 ---
-
-## Local Development Setup
 
 ### 1. Clone the repo
 
@@ -85,17 +93,31 @@ docker compose up --build
 
 Docker Compose automatically merges `compose.override.yaml` with `compose.yaml`, so you don't need any extra flags. The app will start with Air watching for file changes and hot-reloading on save.
 
-The app will be available at: `http://localhost:8000`
+### 5. Initialize the database
+
+Open a shell inside the running container:
+
+```bash
+docker compose exec -it app sh
+```
+
+Then run the database migration command:
+
+```bash
+go run ./cmd/cli db:migrate
+```
+
+The app will be available at: [http://localhost:8000](http://localhost:8000)
 
 ---
 
 ## Services
 
-| Service | Port   | Description                 |
-| ------- | ------ | --------------------------- |
-| `app`   | `8000` | Go application              |
-| `db`    | `5432` | PostgreSQL 16               |
-| `redis` | `6379` | Redis 8 (password: `admin`) |
+| Service | Port   | Description    |
+| ------- | ------ | -------------- |
+| `app`   | `8000` | Go application |
+| `db`    | `5432` | PostgreSQL 16  |
+| `redis` | `6379` | Redis 8        |
 
 ---
 
@@ -143,9 +165,21 @@ Redirects to the original URL.
 
 ---
 
-## Security Notes
+## 🔐 Security Notes
 
-- API keys and magic tokens are stored hashed (SHA-256) — raw values are never persisted
-- Magic tokens expire after 15 minutes and are single-use
-- Only one active API key per email; only one active token per email
+- API keys and magic tokens are stored hashed (SHA-256); raw values are never persisted
+- Magic tokens are single-use and expire after 15 minutes
+- Only one active API key and one active magic token per email
 - API keys expire after 30 days
+
+### Additional Security Considerations
+
+- All sensitive configuration (DB credentials, SMTP, secrets) is provided via environment variables and is never committed to the repository
+- Admin and protected routes require proper authentication; no security relies on obscurity
+- Rate limiting is enforced using Redis to prevent abuse of public endpoints
+- Input validation is applied to all incoming requests
+- This repository is safe to open source under the assumption that **no secrets are exposed and deployment environments are properly configured**
+
+## 📄 License
+
+This project is licensed under the MIT License — see the LICENSE file for details.

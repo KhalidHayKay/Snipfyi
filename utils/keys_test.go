@@ -21,10 +21,10 @@ func startsWith(s, prefix string) bool {
 	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
 }
 
-func TestGenerateMagicToken(t *testing.T) {
-	token, err := GenerateMagicToken()
+func TestGenerateToken(t *testing.T) {
+	token, err := GenerateToken()
 	if err != nil {
-		t.Fatalf("GenerateMagicToken() error: %v", err)
+		t.Fatalf("GenerateToken() error: %v", err)
 	}
 
 	if len(token) < 20 {

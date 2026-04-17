@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func RunStats(ctx context.Context, alias, referrer, userAgent, ipAddress string, timestamp time.Time) error {
+func RunStats(ctx context.Context, alias, referer, userAgent, ipAddress string, timestamp time.Time) error {
 	tx, err := storage.DB.Begin(ctx)
 	if err != nil {
 		log.Printf("Failed to begin transaction for stats update: %v", err)
@@ -31,7 +31,7 @@ func RunStats(ctx context.Context, alias, referrer, userAgent, ipAddress string,
 	_, err = tx.Exec(ctx, `
 		INSERT INTO click_events (url_id, referer, user_agent, ip_address, timestamp)
 		VALUES ($1, $2, $3, $4, $5)
-	`, id, referrer, userAgent, ipAddress, timestamp)
+	`, id, referer, userAgent, ipAddress, timestamp)
 	if err != nil {
 		log.Printf("Failed to insert click event for URL ID %d: %v", id, err)
 		return err

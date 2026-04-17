@@ -1,3 +1,7 @@
+{{define "page-css"}}
+<link rel="stylesheet" href="/static/css/home.css" />
+{{end}}
+
 {{define "content"}}
 
 <!-- ── Hero ── -->
@@ -28,155 +32,145 @@
 					background-color: #ffebee;
 					border: 1px solid #f44336;
 					border-radius: 0.5rem;
-					color: #c62828;
+					color: #b71c1c;
+					font-size: 0.9rem;
 				">
 				{{ .Error }}
 			</div>
 			{{ end }}
 
-			<form method="POST" action="/">
+			<!-- URL input bar -->
+			<form action="/shorten" method="POST">
 				<div class="hero-bar">
-					<input type="url" name="url" value="{{ if .Data }} {{ .Data.Original }} {{ end }}"
-						placeholder="https://a-very-long-url-you-want-to-shorten.com/…" required autocomplete="off"
-						spellcheck="false" />
+					<input type="url" name="url" placeholder="https://a-very-long-url-you-want-to-shorten.com/…"
+						autocomplete="off" required />
 					<button type="submit" class="btn btn-primary">
-						Simplify
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						Shorten
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round">
 							<line x1="5" y1="12" x2="19" y2="12" />
 							<polyline points="12 5 19 12 12 19" />
 						</svg>
 					</button>
 				</div>
-
-				<!-- Result appears here (server-rendered if successful) -->
-				{{ if .Data }}
-				<div class="hero-result show" style="margin-bottom: 10px">
-					<div class="result-tag">Link ready</div>
-					<div class="result-row">
-						<div class="result-url">
-							<a href="{{ .Data.ShortUrl }}" target="_blank" rel="noopener">{{ .Data.ShortUrl }}</a>
-						</div>
-						<div class="result-btns">
-							<button type="button" class="btn btn-primary btn-sm"
-								onclick="copyText('{{ .Data.ShortUrl }}')">
-								Copy
-							</button>
-							<a href="{{ .Data.ShortUrl }}" class="btn btn-ghost btn-sm" target="_blank"
-								rel="noopener">Open ↗</a>
-						</div>
-					</div>
-					<div class="result-divider"></div>
-					<div class="result-bottom">
-						<div class="result-qr-wrap">
-							<div class="result-qr-box" id="hero-qr"></div>
-							<button type="button" class="result-qr-dl" onclick="downloadQR('hero-qr', 'smply-qr.png')">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-									stroke-linecap="round">
-									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-									<polyline points="7 10 12 15 17 10" />
-									<line x1="12" y1="15" x2="12" y2="3" />
-								</svg>
-								Download PNG
-							</button>
-							<script>
-								document.addEventListener('DOMContentLoaded', () => {
-									const qrBox = document.getElementById('hero-qr');
-									const shortLink = qrBox
-										?.closest('.hero-result')
-										?.querySelector('.result-url a')?.href;
-									if (qrBox && shortLink) {
-										generateQR('hero-qr', shortLink);
-									}
-								});
-							</script>
-						</div>
-						<div class="result-stats-col">
-							<span class="result-stats-note">Track clicks at</span>
-							<a href="{{ .Data.StatUrl }}" class="result-stats-link" target="_blank" rel="noopener">
-								<svg viewBox="0 0 24 24">
-									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-								</svg>
-								{{ .Data.StatUrl }}
-							</a>
-						</div>
-					</div>
-				</div>
-				{{ end }}
 			</form>
 
 			<div class="hero-hints">
 				<span class="hero-hint">
 					<svg viewBox="0 0 24 24">
-						<path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
+						<polyline points="20 6 9 17 4 12" />
 					</svg>
-					No account needed
+					No account required
 				</span>
 				<span class="hero-hint">
 					<svg viewBox="0 0 24 24">
-						<path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-					Custom slugs
-				</span>
-				<span class="hero-hint">
-					<svg viewBox="0 0 24 24">
-						<path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
+						<polyline points="20 6 9 17 4 12" />
 					</svg>
 					Click analytics
 				</span>
+				<span class="hero-hint">
+					<svg viewBox="0 0 24 24">
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
+					QR code included
+				</span>
 			</div>
+
+			<!-- Result box (shown after shortening) -->
+			{{ if .Data }}
+			<div class="hero-result show">
+				<div class="result-tag">Link ready</div>
+				<div class="result-row">
+					<div class="result-url">
+						<a href="{{ .Data.ShortUrl }}" target="_blank" rel="noopener">{{ .Data.ShortUrl }}</a>
+					</div>
+					<div class="result-btns">
+						<button class="btn btn-ghost btn-sm"
+							onclick="navigator.clipboard.writeText('{{ .Data.ShortUrl }}')">Copy</button>
+					</div>
+				</div>
+				<div class="result-divider"></div>
+				<div class="result-bottom">
+					<div class="result-qr-wrap">
+						<div class="result-qr-box" id="hero-qr"></div>
+						<button class="result-qr-dl" id="hero-qr-dl">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="7 10 12 15 17 10" />
+								<line x1="12" y1="15" x2="12" y2="3" />
+							</svg>
+							Download
+						</button>
+					</div>
+					<div class="result-stats-col">
+						<div class="result-stats-row">
+							<span class="result-stats-note">Track clicks and analytics</span>
+							<a href="/{{ .Data.Alias }}/stats" class="result-stats-link">
+								<svg viewBox="0 0 24 24">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
+								View stats
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
+				(function () {
+					var qr = new QRCode(document.getElementById('hero-qr'), {
+						text: '{{ .Data.ShortUrl }}',
+						width: 112, height: 112,
+						colorDark: '#0d0f12', colorLight: '#ffffff',
+						correctLevel: QRCode.CorrectLevel.M
+					});
+					document.getElementById('hero-qr-dl').addEventListener('click', function () {
+						var canvas = document.querySelector('#hero-qr canvas');
+						if (canvas) { var a = document.createElement('a'); a.download = 'qr.png'; a.href = canvas.toDataURL(); a.click(); }
+					});
+				})();
+			</script>
+			{{ end }}
+
 		</div>
 	</div>
 </section>
 
-<!-- ── Marquee strip ── -->
+<!-- ── Marquee Strip ── -->
 <div class="strip">
 	<div class="strip-track">
-		<span class="strip-item">Short links</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Custom slugs</b></span>
-		<span class="strip-item">·</span>
-		<span class="strip-item">QR Code</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Fast redirects</b></span>
-		<span class="strip-item">·</span>
-		<span class="strip-item">Link stats</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Built with Go</b></span>
-		<span class="strip-item">·</span>
-		<!-- duplicate for seamless loop -->
-		<span class="strip-item">Short links</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Custom slugs</b></span>
-		<span class="strip-item">·</span>
-		<span class="strip-item">QR Code</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Fast redirects</b></span>
-		<span class="strip-item">·</span>
-		<span class="strip-item">Link stats</span>
-		<span class="strip-item">·</span>
-		<span class="strip-item"><b>Built with Go</b></span>
-		<span class="strip-item">·</span>
+		<span class="strip-item"><b>Shorten</b> links</span>
+		<span class="strip-item"><b>Fast</b> redirect</span>
+		<span class="strip-item"><b>Custom</b> slugs</span>
+		<span class="strip-item"><b>Click</b> analytics</span>
+		<span class="strip-item"><b>QR</b> codes</span>
+		<span class="strip-item"><b>REST</b> API</span>
+		<span class="strip-item"><b>No</b> account needed</span>
+		<span class="strip-item"><b>Open</b> source</span>
+		<span class="strip-item"><b>Shorten</b> links</span>
+		<span class="strip-item"><b>Fast</b> redirect</span>
+		<span class="strip-item"><b>Custom</b> slugs</span>
+		<span class="strip-item"><b>Click</b> analytics</span>
+		<span class="strip-item"><b>QR</b> codes</span>
+		<span class="strip-item"><b>REST</b> API</span>
+		<span class="strip-item"><b>No</b> account needed</span>
+		<span class="strip-item"><b>Open</b> source</span>
 	</div>
 </div>
 
-<!-- ── About / features ── -->
+<!-- ── About & Features ── -->
 <section class="about-section">
 	<div class="container">
 		<div class="about-grid">
 			<div>
 				<div class="about-kicker">What it does</div>
-				<h2 class="about-heading">
-					A URL shortener<br />
-					that <em>stays out of the way</em>
-				</h2>
+				<h2 class="about-heading">A URL shortener </br> that <em>stays out of the way</em></h2>
 				<p class="about-body">
 					smply.cc is built to make link shortening effortless — no friction, no
 					clutter. Shorten any URL, set a custom alias, and see exactly how many
 					times each link has been clicked. Fast, clean, and nothing you don't need.
 				</p>
 			</div>
-
 			<div class="features-list">
 				<div class="feat-item">
 					<div class="feat-icon">
@@ -190,7 +184,6 @@
 						<p>Paste any URL, get a short link. No signup required to shorten.</p>
 					</div>
 				</div>
-
 				<div class="feat-item">
 					<div class="feat-icon">
 						<svg viewBox="0 0 24 24">
@@ -199,14 +192,11 @@
 						</svg>
 					</div>
 					<div class="feat-text">
-						<h4>Custom aliases</h4>
-						<p>
-							Pick your own slug —
-							<code class="code-badge code-badge-sm">smply.cc/anything</code>.
-						</p>
+						<h4>Custom slugs</h4>
+						<p>Choose your own alias like <code class="code-badge">smply.cc/my-link</code> or let us
+							generate one.</p>
 					</div>
 				</div>
-
 				<div class="feat-item">
 					<div class="feat-icon">
 						<svg viewBox="0 0 24 24">
@@ -214,24 +204,21 @@
 						</svg>
 					</div>
 					<div class="feat-text">
-						<h4>Per-link analytics</h4>
-						<p>
-							Every short link has a
-							<code class="code-badge code-badge-sm">/stats</code>
-							page with click counts.
-						</p>
+						<h4>Click analytics</h4>
+						<p>Every link gets a <code class="code-badge">/stats</code> page with total clicks, creation
+							time, and a QR code.</p>
 					</div>
 				</div>
-
 				<div class="feat-item">
 					<div class="feat-icon">
 						<svg viewBox="0 0 24 24">
-							<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+							<rect x="3" y="11" width="18" height="11" rx="2" />
+							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 						</svg>
 					</div>
 					<div class="feat-text">
-						<h4>Fast & clean</h4>
-						<p>Go backend, no client-side frameworks, sub-100ms redirects.</p>
+						<h4>API access</h4>
+						<p>Programmatic shortening via REST API. Request a key from the API page — no OAuth needed.</p>
 					</div>
 				</div>
 			</div>

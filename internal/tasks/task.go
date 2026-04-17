@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	TypeAPIKeyMagicLinkEmail = "email:api-key-magic-link"
-	TypeStatsUpdate          = "stats:update"
+	TypeAPIKeyMagicLinkEmail     = "email:api-key-magic-link"
+	TypeAdminLoginMagicLinkEmail = "email:admin-login-magic-link"
+	TypeStatsUpdate              = "stats:update"
 )
 
 type APIKeyMagicLinkEmailPayload struct {
@@ -17,9 +18,14 @@ type APIKeyMagicLinkEmailPayload struct {
 	Token string
 }
 
+type AdminLoginMagicLinkEmailPayload struct {
+	Email string
+	Token string
+}
+
 type StatsUpdatePayload struct {
 	UrlAlias  string
-	Referrer  string
+	Referer   string
 	UserAgent string
 	IpAddress string
 	Timestamp time.Time
@@ -37,10 +43,10 @@ func NewAPIKeyMagicLinkEmailTask(email, token string) (*asynq.Task, error) {
 	return asynq.NewTask(TypeAPIKeyMagicLinkEmail, payload), nil
 }
 
-func NewStatsUpdateTask(urlAlias, referrer, userAgent, ipAddress string, timestamp time.Time) (*asynq.Task, error) {
+func NewStatsUpdateTask(urlAlias, referer, userAgent, ipAddress string, timestamp time.Time) (*asynq.Task, error) {
 	payload, err := json.Marshal(StatsUpdatePayload{
 		UrlAlias:  urlAlias,
-		Referrer:  referrer,
+		Referer:   referer,
 		UserAgent: userAgent,
 		IpAddress: ipAddress,
 		Timestamp: timestamp,
@@ -50,4 +56,16 @@ func NewStatsUpdateTask(urlAlias, referrer, userAgent, ipAddress string, timesta
 	}
 
 	return asynq.NewTask(TypeStatsUpdate, payload), nil
+}
+
+func NewAdminLoginMagicLinkEmailTask(email string, token string) (*asynq.Task, error) {
+	payload, err := json.Marshal(APIKeyMagicLinkEmailPayload{
+		Email: email,
+		Token: token,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return asynq.NewTask(TypeAdminLoginMagicLinkEmail, payload), nil
 }

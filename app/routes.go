@@ -27,12 +27,31 @@ func setupRouter() *chi.Mux {
 	router.Get("/shorten", handler.ShortenPage)
 	router.Post("/shorten", handler.ShortenPageShorten)
 
-	router.Get("/stats/{alias}", handler.StatsPage)
-
 	router.Get("/api", handler.ApiPage)
 	router.With(keyRequestRateLimiter.Middleware).Post("/api", handler.RequestApiKey)
 
+	router.Get("/stats/{alias}", handler.StatsPage)
+
 	router.Get("/key/activate", handler.CreateApiKey)
+
+	router.Route("/admin", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AdminGuestMiddleware)
+			r.Get("/login", handler.AdminLoginPage)
+		})
+		r.Post("/login", handler.AdminLogin)
+
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AdminAuthenticationMiddleware)
+			r.Get("/stats", handler.AdminStats)
+		})
+
+		r.Get("/auth/redirect", handler.AdminAuth)
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/admin/stats", http.StatusFound)
+		})
+	})
 
 	router.Get("/{alias}", handler.ResolveRedirect)
 	// Note: Specific stats routes should be defined before the catch-all redirect route to avoid conflicts
@@ -44,7 +63,7 @@ func setupRouter() *chi.Mux {
 
 		r.Post("/shorten", handler.Shorten)
 		r.Get("/stats/{alias}", handler.Stats)
-		r.Get("/redirect/{alias}", handler.Redirect)
+		r.Get("/redirect/{alias}", handler.RedirectAPI)
 	})
 
 	// Static files

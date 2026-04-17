@@ -1,0 +1,255 @@
+{{define "page-css"}}
+<link rel="stylesheet" href="/static/css/admin-stats.css" />
+{{end}}
+
+{{define "content"}}
+
+<main class="admin-page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Internal · Admin</p>
+      <h1 class="page-title-admin">App <em>Overview</em></h1>
+    </div>
+    <p class="page-ts" id="ts"></p>
+  </header>
+
+  <!-- ── URLs & Redirects ── -->
+  <section class="section">
+    <p class="section-label">Links & Traffic</p>
+    <div class="stat-grid">
+
+      <div class="stat-card">
+        <span class="stat-label">Total URLs</span>
+        <span class="stat-num">{{.Data.Stats.TotalUrls}}</span>
+        <span class="stat-sub"><b>{{.Data.Stats.UrlsToday}}</b> today</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Total Redirects</span>
+        <span class="stat-num blue">{{.Data.Stats.TotalRedirects}}</span>
+        <span class="stat-sub">all time</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Click Events</span>
+        <span class="stat-num">{{.Data.Stats.TotalClicks}}</span>
+        <span class="stat-sub"><b>{{.Data.Stats.ClicksToday}}</b> today</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">This Week</span>
+        <span class="stat-num blue">{{.Data.Stats.ClicksThisWeek}}</span>
+        <span class="stat-sub">last 7 days</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Links Clicked</span>
+        <span class="stat-num">{{.Data.Stats.UniqueLinksClicked}}</span>
+        <span class="stat-sub">unique links ever clicked</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 7-day trend ── -->
+  <section class="section">
+    <p class="section-label">7-Day Click Trend</p>
+    <div class="chart-card">
+      <div class="card-head">
+        <span class="card-head-title">Daily clicks</span>
+        <span class="card-head-sub">last 7 days</span>
+      </div>
+      <div class="chart-body">
+        {{if .Data.Stats.DailyTrend}}
+        <div class="bar-chart" id="bar-chart"
+          data-values="{{range .Data.Stats.DailyTrend}}{{.Clicks}},{{end}}"
+          data-labels="{{range .Data.Stats.DailyTrend}}{{.Date}},{{end}}">
+        </div>
+        {{else}}
+        <p class="bar-empty">No click data yet.</p>
+        {{end}}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Peak activity ── -->
+  {{if .Data.Stats.TotalClicks}}
+  <section class="section">
+    <p class="section-label">Peak Activity</p>
+    <div class="peak-grid">
+      <div class="peak-card">
+        <p class="peak-label">Busiest Day</p>
+        <p class="peak-value">{{if .Data.Stats.PeakDay}}{{.Data.Stats.PeakDay}}{{else}}—{{end}}</p>
+        <p class="peak-sub">all time</p>
+      </div>
+      <div class="peak-card">
+        <p class="peak-label">Peak Hour</p>
+        <p class="peak-value">{{if .Data.Stats.PeakHourClicks}}{{.Data.Stats.PeakHour}}:00 – {{add
+          .Data.Stats.PeakHour 1}}:00{{else}}—{{end}}</p>
+        <p class="peak-sub">{{if .Data.Stats.PeakHourClicks}}<b>{{.Data.Stats.PeakHourClicks}}</b> clicks at
+          that hour{{else}}no data{{end}}</p>
+      </div>
+    </div>
+  </section>
+  {{end}}
+
+  <div class="divider"></div>
+
+  <!-- ── Top links & Referers ── -->
+  <section class="section">
+    <p class="section-label">Breakdown</p>
+    <div class="two-col">
+
+      <!-- Top links -->
+      <div class="chart-card">
+        <div class="card-head">
+          <span class="card-head-title">Top links</span>
+          <span class="card-head-sub">by clicks</span>
+        </div>
+        {{if .Data.Stats.TopLinks}}
+        <div class="ranked-list">
+          {{$max := (index .Data.Stats.TopLinks 0).Clicks}}
+          {{range $i, $l := .Data.Stats.TopLinks}}
+          <div class="ranked-row">
+            <span class="ranked-pos">{{add $i 1}}</span>
+            <span class="ranked-name">{{$l.Alias}}</span>
+            <div class="ranked-bar-wrap">
+              <div class="ranked-bar">
+                <div class="ranked-bar-fill" style="width:{{percent $l.Clicks $max}}%"></div>
+              </div>
+              <span class="ranked-count">{{$l.Clicks}}</span>
+            </div>
+          </div>
+          {{end}}
+        </div>
+        {{else}}
+        <p class="no-data">No click data yet.</p>
+        {{end}}
+      </div>
+
+      <!-- Top referers -->
+      <div class="chart-card">
+        <div class="card-head">
+          <span class="card-head-title">Top referers</span>
+          <span class="card-head-sub">traffic sources</span>
+        </div>
+        {{if .Data.Stats.TopReferers}}
+        <div class="ranked-list">
+          {{$max := (index .Data.Stats.TopReferers 0).Clicks}}
+          {{range $i, $r := .Data.Stats.TopReferers}}
+          <div class="ranked-row">
+            <span class="ranked-pos">{{add $i 1}}</span>
+            <span class="ranked-name plain">{{$r.Referer}}</span>
+            <div class="ranked-bar-wrap">
+              <div class="ranked-bar">
+                <div class="ranked-bar-fill" style="width:{{percent $r.Clicks $max}}%"></div>
+              </div>
+              <span class="ranked-count">{{$r.Clicks}}</span>
+            </div>
+          </div>
+          {{end}}
+        </div>
+        {{else}}
+        <p class="no-data">No referer data yet.</p>
+        {{end}}
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Device breakdown ── -->
+  {{if .Data.Stats.TopDevices}}
+  <section class="section">
+    <div class="chart-card">
+      <div class="card-head">
+        <span class="card-head-title">Device types</span>
+        <span class="card-head-sub">from user agent</span>
+      </div>
+      <div class="ranked-list">
+        {{$max := (index .Data.Stats.TopDevices 0).Clicks}}
+        {{range $d := .Data.Stats.TopDevices}}
+        <div class="ranked-row">
+          <span class="device-pill {{lower $d.Device}}">{{$d.Device}}</span>
+          <span style="flex:1"></span>
+          <div class="ranked-bar-wrap">
+            <div class="ranked-bar" style="width:96px">
+              <div class="ranked-bar-fill" style="width:{{percent $d.Clicks $max}}%"></div>
+            </div>
+            <span class="ranked-count">{{$d.Clicks}}</span>
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </div>
+  </section>
+  {{end}}
+
+  <div class="divider"></div>
+
+  <!-- ── API Access ── -->
+  <section class="section">
+    <p class="section-label">API Access</p>
+    <div class="access-grid">
+      <div class="stat-card">
+        <span class="stat-label">Keys Issued</span>
+        <span class="stat-num">{{.Data.Stats.TotalApiKeys}}</span>
+        <span class="stat-sub">all time</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active Keys</span>
+        <span class="stat-num green">{{.Data.Stats.ActiveApiKeys}}</span>
+        <span class="stat-sub">not expired</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Magic Links</span>
+        <span class="stat-num">{{.Data.Stats.TotalTokens}}</span>
+        <span class="stat-sub"><b>{{.Data.Stats.TokensToday}}</b> today</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Timestamp
+  document.getElementById('ts').textContent =
+    'Loaded ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Bar chart
+  (function () {
+    var chart = document.getElementById('bar-chart');
+    if (!chart) return;
+
+    var raw = chart.dataset.values.split(',').filter(Boolean).map(Number);
+    var labels = chart.dataset.labels.split(',').filter(Boolean);
+    var max = Math.max.apply(null, raw) || 1;
+
+    raw.forEach(function (v, i) {
+      var pct = Math.round((v / max) * 100);
+      var col = document.createElement('div');
+      col.className = 'bar-col';
+
+      var valEl = document.createElement('div');
+      valEl.className = 'bar-val';
+      valEl.textContent = v > 0 ? v : '';
+
+      var barEl = document.createElement('div');
+      barEl.className = 'bar' + (i === raw.length - 1 ? ' today' : '');
+      barEl.style.height = Math.max(pct, 3) + '%';
+      barEl.title = labels[i] + ': ' + v + ' clicks';
+
+      var dateEl = document.createElement('div');
+      dateEl.className = 'bar-date';
+      dateEl.textContent = labels[i] ? labels[i].split(' ')[1] : '';
+
+      col.appendChild(valEl);
+      col.appendChild(barEl);
+      col.appendChild(dateEl);
+      chart.appendChild(col);
+    });
+  }());
+</script>
+
+{{end}}

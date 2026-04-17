@@ -3,8 +3,10 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"smply/config"
 	"smply/internal/render"
 	"smply/internal/service"
+	"strings"
 )
 
 func CORSMiddleware(next http.Handler) http.Handler {
@@ -40,6 +42,30 @@ func RequireKey(next http.Handler) http.Handler {
 		if !valid {
 			render.ErrorJSON(w, http.StatusUnauthorized, "Invalid or expired API key")
 			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func AdminAuthenticationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
+
+		if err != nil || !service.ValidateSession(r.Context(), sessionId.Value) {
+			http.Redirect(w, r, "/admin/login", http.StatusFound)
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func AdminGuestMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
+
+		if err == nil && service.ValidateSession(r.Context(), sessionId.Value) {
+			http.Redirect(w, r, "/admin", http.StatusFound)
 		}
 
 		next.ServeHTTP(w, r)

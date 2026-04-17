@@ -1,0 +1,354 @@
+/* ============================================
+   SHORTEN.CSS — Shorten page specific styles
+   Requires: base.css
+   ============================================ */
+
+.shorten-page {
+	min-height: calc(100vh - 56px);
+	padding: 60px 0 80px;
+}
+.shorten-layout {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 60px;
+	align-items: start;
+	max-width: 900px;
+}
+
+/* ── Page header text ── */
+.page-kicker {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--grey3);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	margin-bottom: 12px;
+}
+.page-title {
+	font-family: var(--font-serif);
+	font-size: clamp(30px, 4vw, 44px);
+	font-weight: 400;
+	color: var(--ink);
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+	margin-bottom: 10px;
+}
+.page-title em {
+	font-style: italic;
+	color: var(--blue);
+}
+.page-sub {
+	font-size: 14px;
+	color: var(--grey4);
+	line-height: 1.7;
+	margin-bottom: 36px;
+}
+
+/* ── How It Works Section ── */
+.steps-container {
+	margin-top: 36px;
+	padding: 20px;
+	background: var(--white);
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius-lg);
+}
+.steps-label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	color: var(--grey3);
+	margin-bottom: 14px;
+}
+.steps-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.step-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+.step-number {
+	width: 22px;
+	height: 22px;
+	background: var(--ink);
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-top: 1px;
+	font-size: 11px;
+	font-weight: 700;
+	color: white;
+}
+.step-number.accent {
+	background: var(--blue);
+}
+.step-text h4 {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--ink);
+	margin-bottom: 2px;
+}
+.step-text p {
+	font-size: 12px;
+	color: var(--grey4);
+}
+
+/* ── Form Card ── */
+.form-card {
+	background: var(--white);
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius-xl);
+	padding: 30px;
+	box-shadow: var(--shadow-sm);
+}
+
+.field {
+	margin-bottom: 18px;
+}
+.field label {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--ink);
+	margin-bottom: 6px;
+}
+.field .opt {
+	font-weight: 400;
+	color: var(--grey3);
+	font-size: 12px;
+}
+.field input {
+	width: 100%;
+	padding: 10px 13px;
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius);
+	font-size: 14px;
+	color: var(--ink);
+	background: var(--warm);
+	transition: var(--transition);
+}
+.field input:focus {
+	border-color: var(--blue2);
+	background: var(--white);
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+.field input::placeholder {
+	color: var(--grey3);
+}
+.field-hint {
+	font-size: 11px;
+	color: var(--grey3);
+	margin-top: 4px;
+}
+
+.alias-wrap {
+	display: flex;
+}
+.alias-pre {
+	padding: 10px 12px;
+	background: var(--grey1);
+	border: 1px solid var(--grey2);
+	border-right: none;
+	border-radius: var(--radius) 0 0 var(--radius);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--grey4);
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+.alias-wrap input {
+	border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.form-sep {
+	height: 1px;
+	background: var(--grey2);
+	margin: 22px 0;
+}
+
+/* ── Shorten Result ── */
+.shorten-result {
+	background: var(--white);
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius-xl);
+	padding: 28px 30px;
+	display: none;
+	box-shadow: var(--shadow-sm);
+	animation: fadeSlideUp 0.22s ease;
+}
+.shorten-result.show {
+	display: block;
+}
+
+.sr-tag {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: var(--success);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 14px;
+}
+.sr-pulse {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--success);
+	animation: dot-pulse 2s infinite;
+}
+.sr-url {
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	color: var(--blue);
+	margin-bottom: 14px;
+	word-break: break-all;
+}
+.sr-btns {
+	display: flex;
+	gap: 7px;
+	flex-wrap: wrap;
+	margin-bottom: 18px;
+}
+.sr-divider {
+	height: 1px;
+	background: var(--grey2);
+	margin-bottom: 16px;
+}
+.sr-stats {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.sr-stats-note {
+	font-size: 12px;
+	color: var(--grey4);
+	line-height: 1.5;
+}
+.sr-stats-note strong {
+	color: var(--ink);
+}
+.sr-stats-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--blue);
+	background: rgba(37, 99, 235, 0.06);
+	border: 1px solid rgba(37, 99, 235, 0.15);
+	border-radius: var(--radius-sm);
+	padding: 5px 11px;
+	transition: var(--transition);
+	font-family: monospace;
+	letter-spacing: -0.01em;
+}
+.sr-stats-btn:hover {
+	background: rgba(37, 99, 235, 0.11);
+}
+.sr-stats-btn svg {
+	width: 11px;
+	height: 11px;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 2.2;
+	flex-shrink: 0;
+}
+
+/* ── Shorten QR ── */
+.sr-main {
+	display: flex;
+	align-items: flex-start;
+	gap: 20px;
+}
+.sr-left {
+	flex: 1;
+	min-width: 0;
+}
+.sr-qr-col {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+.sr-qr-box {
+	width: 128px;
+	height: 128px;
+	background: var(--white);
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+.sr-qr-box img,
+.sr-qr-box canvas {
+	display: block;
+	width: 128px !important;
+	height: 128px !important;
+}
+.sr-qr-dl {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--grey4);
+	background: var(--grey1);
+	border: 1px solid var(--grey2);
+	border-radius: var(--radius-sm);
+	padding: 6px 12px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	transition: var(--transition);
+	white-space: nowrap;
+	cursor: pointer;
+}
+.sr-qr-dl:hover {
+	color: var(--ink);
+	border-color: var(--grey3);
+	background: var(--white);
+}
+.sr-qr-dl svg {
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+	.shorten-layout {
+		grid-template-columns: 1fr;
+		gap: 40px;
+	}
+}
+@media (max-width: 480px) {
+	.sr-main {
+		flex-direction: column-reverse;
+	}
+	.sr-qr-col {
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+	}
+	.sr-qr-box {
+		width: 80px;
+		height: 80px;
+	}
+	.sr-qr-box img,
+	.sr-qr-box canvas {
+		width: 80px !important;
+		height: 80px !important;
+	}
+}

@@ -18,7 +18,7 @@ func HandleAPIKeyMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
 		return err
 	}
 
-	return service.SendMagicLinkEmail(payload.Email, payload.Token)
+	return service.SendAPIKeyMagicLinkEmail(payload.Email, payload.Token)
 }
 
 func HandleStatsUpdate(ctx context.Context, task *asynq.Task) error {
@@ -31,9 +31,20 @@ func HandleStatsUpdate(ctx context.Context, task *asynq.Task) error {
 
 	return service.RunStats(ctx,
 		payload.UrlAlias,
-		payload.Referrer,
+		payload.Referer,
 		payload.UserAgent,
 		payload.IpAddress,
 		payload.Timestamp,
 	)
+}
+
+func HandleAdminLoginMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
+	var payload tasks.AdminLoginMagicLinkEmailPayload
+	err := json.Unmarshal(task.Payload(), &payload)
+	if err != nil {
+		log.Printf("Failed to unmarshal admin login magic link email task payload: %v", err)
+		return err
+	}
+
+	return service.SendAdminLoginMagicLinkEmail(payload.Email, payload.Token)
 }

@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"smply/internal/queue"
 	"smply/internal/render"
 	"smply/internal/service"
 	"text/template"
@@ -24,18 +25,17 @@ func RequestApiKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := service.RequestApiKey(r.Context(), email)
+	token, err := service.CreateMagicToken(r.Context(), email)
 	if err != nil {
-		log.Println(err)
-
-		data.Error = "Failed to process request"
-
-		if err.Error() == "mailer error" {
-			data.Error = "Unable to send email, please try again"
-		}
-
+		log.Printf("Error creating magic token for %s: %v", email, err)
+		data.Error = "Unable to process your request. Please try again later."
 		render.Page(w, "api.html", data)
 		return
+	}
+
+	err = queue.EnqueueAPIKeyMagicLinkEmail(r.Context(), email, token)
+	if err != nil {
+		log.Printf("failed to enqueue email: %v", err)
 	}
 
 	data.Data = map[string]string{"SentTo": email}
@@ -46,7 +46,7 @@ func CreateApiKey(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	if token == "" {
-		render.ErrorPage(w, http.StatusUnprocessableEntity, "cannot find token")
+		render.ErrorPage(w, http.StatusUnprocessableEntity, "Cannot find token")
 		return
 	}
 

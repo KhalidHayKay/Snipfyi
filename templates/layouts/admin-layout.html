@@ -1,0 +1,55 @@
+{{define "admin-layout"}}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Smply · {{.Title}}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/static/css/base.css" />
+  <link rel="stylesheet" href="/static/css/admin-base.css" />
+  {{block "page-css" .}}{{end}}
+</head>
+
+<body class="admin-body">
+
+  <nav class="admin-nav">
+    <div class="admin-container">
+      <div class="admin-nav-inner">
+
+        <a href="/admin" class="admin-nav-logo">
+          <div class="admin-logo-mark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="14" height="14">
+              <path d="M9 16a7 7 0 0 1 14 0" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <circle cx="16" cy="16" r="2.5" fill="white" />
+            </svg>
+          </div>
+          smply<span class="admin-logo-tld">.cc</span>
+          <span class="admin-logo-badge">Admin</span>
+        </a>
+
+        <ul class="admin-nav-links">
+          <li><a href="/admin/stats" {{if eq .Page "admin-stats" }}class="active" {{end}}>Overview</a></li>
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+
+  {{block "content" .}}{{end}}
+
+  <footer class="admin-footer">
+    <div class="admin-container">
+      <div class="admin-footer-inner">
+        <span class="admin-footer-brand">smply<span class="tld">.cc</span></span>
+        <span class="admin-footer-note">Internal · Restricted Access</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
+{{end}}

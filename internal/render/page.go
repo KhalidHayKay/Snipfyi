@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type ViewData struct {
@@ -15,6 +16,8 @@ type ViewData struct {
 
 // Page renders an HTML template with the given data
 func Page(w http.ResponseWriter, page string, data ViewData) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	t, err := template.ParseFiles(
 		"templates/layouts/layout.html",
 		"templates/pages/"+page,
@@ -25,8 +28,57 @@ func Page(w http.ResponseWriter, page string, data ViewData) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := t.ExecuteTemplate(w, "layout", data); err != nil {
+		log.Printf("ERROR: Failed to execute template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func AdminPage(w http.ResponseWriter, page string, data ViewData) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	funcMap := template.FuncMap{
+		"add": func(a, b int) int { return a + b },
+		"percent": func(val, max int64) int64 {
+			if max == 0 {
+				return 0
+			}
+			return val * 100 / max
+		},
+		"lower": strings.ToLower,
+	}
+
+	t, err := template.New("admin-layout").
+		Funcs(funcMap).
+		ParseFiles(
+			"templates/layouts/admin-layout.html",
+			"templates/pages/"+page,
+		)
+	if err != nil {
+		log.Printf("ERROR: Failed to parse templates: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := t.ExecuteTemplate(w, "admin-layout", data); err != nil {
+		log.Printf("ERROR: Failed to execute template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func SinglePage(w http.ResponseWriter, page string, data ViewData) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	t, err := template.ParseFiles("templates/pages/" + page)
+	if err != nil {
+		log.Printf("ERROR: Failed to parse template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := t.Execute(w, data); err != nil {
 		log.Printf("ERROR: Failed to execute template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
