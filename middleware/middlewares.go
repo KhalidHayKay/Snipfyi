@@ -48,12 +48,24 @@ func RequireKey(next http.Handler) http.Handler {
 	})
 }
 
-func AdminVerificationMiddleware(next http.Handler) http.Handler {
+func AdminAuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
 
 		if err != nil || !service.ValidateSession(r.Context(), sessionId.Value) {
 			http.Redirect(w, r, "/admin/login", http.StatusFound)
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func AdminGuestMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
+
+		if err == nil && service.ValidateSession(r.Context(), sessionId.Value) {
+			http.Redirect(w, r, "/admin", http.StatusFound)
 		}
 
 		next.ServeHTTP(w, r)

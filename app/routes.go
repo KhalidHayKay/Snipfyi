@@ -35,17 +35,22 @@ func setupRouter() *chi.Mux {
 	router.Get("/key/activate", handler.CreateApiKey)
 
 	router.Route("/admin", func(r chi.Router) {
-		r.Get("/login", handler.AdminLoginPage)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AdminGuestMiddleware)
+			r.Get("/login", handler.AdminLoginPage)
+		})
 		r.Post("/login", handler.AdminLogin)
 
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.AdminVerificationMiddleware)
+			r.Use(middleware.AdminAuthenticationMiddleware)
 			r.Get("/stats", handler.AdminStats)
 		})
 
 		r.Get("/auth/redirect", handler.AdminAuth)
 
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, "/admin/stats", http.StatusFound) })
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/admin/stats", http.StatusFound)
+		})
 	})
 
 	router.Get("/{alias}", handler.ResolveRedirect)

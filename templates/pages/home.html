@@ -42,16 +42,12 @@
 			<!-- URL input bar -->
 			<form action="/shorten" method="POST">
 				<div class="hero-bar">
-					<input
-						type="url"
-						name="url"
-						placeholder="Paste a long URL…"
-						autocomplete="off"
-						required
-					/>
+					<input type="url" name="url" placeholder="https://a-very-long-url-you-want-to-shorten.com/…"
+						autocomplete="off" required />
 					<button type="submit" class="btn btn-primary">
 						Shorten
-						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round">
 							<line x1="5" y1="12" x2="19" y2="12" />
 							<polyline points="12 5 19 12 12 19" />
 						</svg>
@@ -61,15 +57,21 @@
 
 			<div class="hero-hints">
 				<span class="hero-hint">
-					<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+					<svg viewBox="0 0 24 24">
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
 					No account required
 				</span>
 				<span class="hero-hint">
-					<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+					<svg viewBox="0 0 24 24">
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
 					Click analytics
 				</span>
 				<span class="hero-hint">
-					<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+					<svg viewBox="0 0 24 24">
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
 					QR code included
 				</span>
 			</div>
@@ -83,7 +85,8 @@
 						<a href="{{ .Data.ShortUrl }}" target="_blank" rel="noopener">{{ .Data.ShortUrl }}</a>
 					</div>
 					<div class="result-btns">
-						<button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('{{ .Data.ShortUrl }}')">Copy</button>
+						<button class="btn btn-ghost btn-sm"
+							onclick="navigator.clipboard.writeText('{{ .Data.ShortUrl }}')">Copy</button>
 					</div>
 				</div>
 				<div class="result-divider"></div>
@@ -91,7 +94,12 @@
 					<div class="result-qr-wrap">
 						<div class="result-qr-box" id="hero-qr"></div>
 						<button class="result-qr-dl" id="hero-qr-dl">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="7 10 12 15 17 10" />
+								<line x1="12" y1="15" x2="12" y2="3" />
+							</svg>
 							Download
 						</button>
 					</div>
@@ -99,7 +107,9 @@
 						<div class="result-stats-row">
 							<span class="result-stats-note">Track clicks and analytics</span>
 							<a href="/{{ .Data.Alias }}/stats" class="result-stats-link">
-								<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+								<svg viewBox="0 0 24 24">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
 								View stats
 							</a>
 						</div>
@@ -107,14 +117,14 @@
 				</div>
 			</div>
 			<script>
-				(function() {
+				(function () {
 					var qr = new QRCode(document.getElementById('hero-qr'), {
 						text: '{{ .Data.ShortUrl }}',
 						width: 112, height: 112,
 						colorDark: '#0d0f12', colorLight: '#ffffff',
 						correctLevel: QRCode.CorrectLevel.M
 					});
-					document.getElementById('hero-qr-dl').addEventListener('click', function() {
+					document.getElementById('hero-qr-dl').addEventListener('click', function () {
 						var canvas = document.querySelector('#hero-qr canvas');
 						if (canvas) { var a = document.createElement('a'); a.download = 'qr.png'; a.href = canvas.toDataURL(); a.click(); }
 					});
@@ -129,6 +139,7 @@
 <!-- ── Marquee Strip ── -->
 <div class="strip">
 	<div class="strip-track">
+		<span class="strip-item"><b>Shorten</b> links</span>
 		<span class="strip-item"><b>Fast</b> redirect</span>
 		<span class="strip-item"><b>Custom</b> slugs</span>
 		<span class="strip-item"><b>Click</b> analytics</span>
@@ -136,6 +147,7 @@
 		<span class="strip-item"><b>REST</b> API</span>
 		<span class="strip-item"><b>No</b> account needed</span>
 		<span class="strip-item"><b>Open</b> source</span>
+		<span class="strip-item"><b>Shorten</b> links</span>
 		<span class="strip-item"><b>Fast</b> redirect</span>
 		<span class="strip-item"><b>Custom</b> slugs</span>
 		<span class="strip-item"><b>Click</b> analytics</span>
@@ -151,36 +163,58 @@
 	<div class="container">
 		<div class="about-grid">
 			<div>
-				<div class="about-kicker">About</div>
-				<h2 class="about-heading">Built for <em>simplicity</em></h2>
+				<div class="about-kicker">What it does</div>
+				<h2 class="about-heading">A URL shortener </br> that <em>stays out of the way</em></h2>
 				<p class="about-body">
-					Smply is a no-friction URL shortener. Paste a link, get a short one instantly.
-					Every short link comes with click analytics, a QR code, and a dedicated stats page —
-					no account required.
+					smply.cc is built to make link shortening effortless — no friction, no
+					clutter. Shorten any URL, set a custom alias, and see exactly how many
+					times each link has been clicked. Fast, clean, and nothing you don't need.
 				</p>
 			</div>
 			<div class="features-list">
 				<div class="feat-item">
 					<div class="feat-icon">
-						<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+						<svg viewBox="0 0 24 24">
+							<path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3" />
+							<line x1="8" y1="12" x2="16" y2="12" />
+						</svg>
 					</div>
 					<div class="feat-text">
-						<h4>Click analytics</h4>
-						<p>Every link gets a <code class="code-badge">/stats</code> page with total clicks, creation time, and a QR code.</p>
+						<h4>Instant shortening</h4>
+						<p>Paste any URL, get a short link. No signup required to shorten.</p>
 					</div>
 				</div>
 				<div class="feat-item">
 					<div class="feat-icon">
-						<svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+						<svg viewBox="0 0 24 24">
+							<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+							<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+						</svg>
 					</div>
 					<div class="feat-text">
 						<h4>Custom slugs</h4>
-						<p>Choose your own alias like <code class="code-badge">smply.cc/my-link</code> or let us generate one.</p>
+						<p>Choose your own alias like <code class="code-badge">smply.cc/my-link</code> or let us
+							generate one.</p>
 					</div>
 				</div>
 				<div class="feat-item">
 					<div class="feat-icon">
-						<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+						<svg viewBox="0 0 24 24">
+							<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+						</svg>
+					</div>
+					<div class="feat-text">
+						<h4>Click analytics</h4>
+						<p>Every link gets a <code class="code-badge">/stats</code> page with total clicks, creation
+							time, and a QR code.</p>
+					</div>
+				</div>
+				<div class="feat-item">
+					<div class="feat-icon">
+						<svg viewBox="0 0 24 24">
+							<rect x="3" y="11" width="18" height="11" rx="2" />
+							<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+						</svg>
 					</div>
 					<div class="feat-text">
 						<h4>API access</h4>

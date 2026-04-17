@@ -61,7 +61,7 @@ func SendAdminLoginMagicLinkEmail(email string, token string) error {
 		config.Env.Mailer.Pass,
 	)
 
-	t, err := template.ParseFiles("templates/emails/magic-link.html")
+	t, err := template.ParseFiles("templates/emails/admin-magic-link.html")
 	if err != nil {
 		log.Printf("Failed to parse email template: %v", err)
 		return err
