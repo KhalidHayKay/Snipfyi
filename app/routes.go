@@ -44,6 +44,8 @@ func setupRouter() *chi.Mux {
 		})
 
 		r.Get("/auth/redirect", handler.AdminAuth)
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, "/admin/stats", http.StatusFound) })
 	})
 
 	router.Get("/{alias}", handler.ResolveRedirect)

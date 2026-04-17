@@ -1,22 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
+{{define "page-css"}}
+<link rel="stylesheet" href="/static/css/admin-login.css" />
+{{end}}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
+{{define "content"}}
 
-<body>
+<main class="admin-login-page">
+  <div class="admin-login-card">
 
-    <form action="/admin/login" method="POST">
-        <label for="email">Email</label><br>
-        <input type="email" id="email" name="email" required>
+    <!-- Header -->
+    <div class="admin-login-header">
+      <p class="admin-login-eyebrow">Internal · Restricted</p>
+      <h1 class="admin-login-title">Admin <em>access</em></h1>
+      <p class="admin-login-sub">
+        Enter your admin email address. A magic link will be sent to sign you in — no password needed.
+      </p>
+    </div>
 
-        <br><br>
+    <!-- Body / Form -->
+    <div class="admin-login-body">
 
-        <button type="submit">Login</button>
-    </form>
+      <!-- Success state -->
+      {{ if and .Data .Data.SentTo }}
+      <div class="admin-msg admin-msg-success">
+        <svg viewBox="0 0 24 24">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <div>
+          <strong>Check your inbox.</strong> A magic link has been sent to <strong>{{ .Data.SentTo }}</strong>.
+          The link is valid for 15 minutes.
+        </div>
+      </div>
+      {{ end }}
 
-</body>
+      <!-- Error state -->
+      {{ if .Error }}
+      <div class="admin-msg admin-msg-error">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <div>{{ .Error }}</div>
+      </div>
+      {{ end }}
 
-</html>
+      <!-- Form — hidden after success -->
+      {{ if not .Data }}
+      <form action="/admin/login" method="POST">
+        <div class="admin-field">
+          <label for="email">Admin email address</label>
+          <input type="email" id="email" name="email" placeholder="admin@example.com" autocomplete="email" required
+            autofocus />
+        </div>
+
+        <button type="submit" class="admin-submit">
+          Send magic link
+          <svg viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </form>
+      {{ end }}
+
+    </div>
+
+    <!-- Footer note -->
+    <div class="admin-login-footer">
+      <p>
+        Only authorised admin addresses can sign in. &nbsp;·&nbsp;
+        <a href="/">Back to site</a>
+      </p>
+    </div>
+
+  </div>
+</main>
+
+{{end}}

@@ -11,15 +11,22 @@ import (
 )
 
 func AdminLoginPage(w http.ResponseWriter, r *http.Request) {
-	render.SinglePage(w, "admin/login.html", render.ViewData{})
+	render.AdminPage(w, "admin/login.html", render.ViewData{})
 }
 
 func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
 	if email == "" {
-		render.SinglePage(w, "admin/login.html", render.ViewData{
+		render.AdminPage(w, "admin/login.html", render.ViewData{
 			Error: "Email is required",
+		})
+		return
+	}
+
+	if email != config.Env.AdminEmail {
+		render.AdminPage(w, "admin/login.html", render.ViewData{
+			Error: "Email is not approved",
 		})
 		return
 	}
@@ -27,7 +34,7 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	token, err := service.CreateMagicToken(r.Context(), email)
 	if err != nil {
 		log.Printf("Error creating magic token for %s: %v", email, err)
-		render.SinglePage(w, "admin/login.html", render.ViewData{
+		render.AdminPage(w, "admin/login.html", render.ViewData{
 			Error: "Internal server error",
 		})
 		return
@@ -36,13 +43,13 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	err = queue.EnqueueAdminLoginMagicLinkEmail(r.Context(), email, token)
 	if err != nil {
 		log.Println("Error enqueuing admin login magic link email:", err)
-		render.SinglePage(w, "admin/login.html", render.ViewData{
+		render.AdminPage(w, "admin/login.html", render.ViewData{
 			Error: "Internal server error",
 		})
 		return
 	}
 
-	render.SinglePage(w, "admin/login.html", render.ViewData{
+	render.AdminPage(w, "admin/login.html", render.ViewData{
 		Data: map[string]string{
 			"SentTo": email,
 		},
@@ -67,7 +74,7 @@ func AdminAuth(w http.ResponseWriter, r *http.Request) {
 	sessionId, err := service.CreateSession(r.Context(), magicToken.Email)
 	if err != nil {
 		log.Println("Error creating session:", err)
-		render.SinglePage(w, "admin/login.html", render.ViewData{
+		render.AdminPage(w, "admin/login.html", render.ViewData{
 			Error: "Internal server error",
 		})
 		return
@@ -85,49 +92,18 @@ func AdminAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminStats(w http.ResponseWriter, r *http.Request) {
-	render.SinglePage(w, "admin/stats.html", render.ViewData{})
-	// stats, err := service.GetAdminStats(r.Context())
-	// if err != nil {
-	// 	log.Println(err)
-	// 	render.ErrorPage(w, http.StatusInternalServerError, "Internal server error")
-	// 	return
-	// }
+	stats, err := service.GetAdminStats(r.Context())
+	if err != nil {
+		log.Println(err)
+		render.ErrorPage(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
 
-	// t := template.New("").Funcs(template.FuncMap{
-	// 	"add": func(a, b int) int { return a + b },
-	// 	"percent": func(val, max int64) int64 {
-	// 		if max == 0 {
-	// 			return 0
-	// 		}
-	// 		return val * 100 / max
-	// 	},
-	// 	"lower": strings.ToLower,
-	// })
-
-	// t, err = t.ParseFiles("templates/pages/admin-stats.html")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	render.ErrorPage(w, http.StatusInternalServerError, "Internal server error")
-	// 	return
-	// }
-
-	// if err := t.ExecuteTemplate(w, "admin-stats.html", render.ViewData{
-	// 	Title: "Admin Stats",
-	// 	Page:  "admin_stats",
-	// 	Data: map[string]any{
-	// 		"Stats": stats,
-	// 	},
-	// }); err != nil {
-	// 	log.Println("EXECUTE ERROR:", err)
-	// 	render.ErrorPage(w, http.StatusInternalServerError, "Internal server error")
-	// 	return
-	// }
-
-	// render.Page(w, "admin/stats.html", render.ViewData{
-	// Title: "Admin Stats",
-	// Page:  "admin_stats",
-	// Data: map[string]any{
-	// 	"Stats": stats,
-	// },
-	// })
+	render.AdminPage(w, "admin/stats.html", render.ViewData{
+		Title: "Admin Stats",
+		Page:  "admin_stats",
+		Data: map[string]any{
+			"Stats": stats,
+		},
+	})
 }
