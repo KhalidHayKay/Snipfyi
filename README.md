@@ -49,7 +49,7 @@ The application is split into:
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-org/smply.git
+git clone https://github.com/khalidhaykay/smply.git
 cd smply
 ```
 
