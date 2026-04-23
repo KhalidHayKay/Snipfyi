@@ -84,7 +84,6 @@ func AdminAuth(w http.ResponseWriter, r *http.Request) {
 		Name:     strings.ToLower(config.Env.App.Name) + "_session_id",
 		Value:    sessionId,
 		Path:     "/",
-		MaxAge:   60 * 60,
 		Secure:   true,
 		HttpOnly: true,
 	})
