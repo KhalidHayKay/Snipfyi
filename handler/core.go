@@ -17,13 +17,15 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func shortenForm(w http.ResponseWriter, r *http.Request, title, page, file string) {
+func ShortenForm(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
 	alias := r.FormValue("alias")
 
+	file := "shorten.html"
+
 	data := render.ViewData{
-		Title: title,
-		Page:  page,
+		Title: "Shorten URL",
+		Page:  "shorten",
 	}
 
 	if url == "" {

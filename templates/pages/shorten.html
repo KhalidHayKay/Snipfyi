@@ -79,8 +79,9 @@
 							<div class="alias-wrap">
 								<div class="alias-pre">smply.cc/</div>
 								<input id="alias-input" type="text" name="alias" placeholder="my-link"
-									pattern="[a-zA-Z0-9\-_]+" title="Letters, numbers, hyphens and underscores only"
-									autocomplete="off" spellcheck="false" />
+									value="{{ if .Data }}{{ .Data.Alias }}{{ end }}" pattern="[a-zA-Z0-9\-_]+"
+									title="Letters, numbers, hyphens and underscores only" autocomplete="off"
+									spellcheck="false" />
 							</div>
 							<div class="field-hint">
 								Letters, numbers, hyphens, underscores. Leave blank for a random code.

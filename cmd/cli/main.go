@@ -44,7 +44,7 @@ func migrateDB(ctx context.Context) {
 	_, err := storage.DB.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS urls (
 			id SERIAL PRIMARY KEY,
-			original TEXT UNIQUE NOT NULL,
+			original TEXT NOT NULL,
 			alias TEXT UNIQUE NOT NULL,
 			visited INTEGER DEFAULT 0,
 			created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
