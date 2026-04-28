@@ -17,19 +17,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func HomeShorten(w http.ResponseWriter, r *http.Request) {
-	shortenForm(w, r, "Home", "home", "home.html")
-}
-
 func ShortenPage(w http.ResponseWriter, r *http.Request) {
 	render.Page(w, "shorten.html", render.ViewData{
 		Title: "Shorten URL",
 		Page:  "shorten",
 	})
-}
-
-func ShortenPageShorten(w http.ResponseWriter, r *http.Request) {
-	shortenForm(w, r, "Shorten URL", "shorten", "shorten.html")
 }
 
 func ApiPage(w http.ResponseWriter, r *http.Request) {

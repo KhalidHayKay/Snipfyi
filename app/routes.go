@@ -22,10 +22,10 @@ func setupRouter() *chi.Mux {
 
 	// Page routes
 	router.Get("/", handler.Home)
-	router.Post("/", handler.HomeShorten)
-
 	router.Get("/shorten", handler.ShortenPage)
-	router.Post("/shorten", handler.ShortenPageShorten)
+
+	// TODO: rate limit
+	router.Post("/shorten", handler.ShortenForm)
 
 	router.Get("/api", handler.ApiPage)
 	router.With(keyRequestRateLimiter.Middleware).Post("/api", handler.RequestApiKey)
