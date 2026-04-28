@@ -69,16 +69,4 @@ var migrations = []Migration{
 		);`,
 		Down: `DROP TABLE IF EXISTS click_events CASCADE;`,
 	},
-	{
-		Name: "000005_create_click_events_table",
-		Up: `CREATE TABLE click_events (
-			id BIGSERIAL PRIMARY KEY,
-			url_id INTEGER NOT NULL REFERENCES urls(id) ON DELETE CASCADE,
-			referer TEXT,
-			user_agent TEXT,
-			ip_address TEXT,
-			timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-		);`,
-		Down: `DROP TABLE IF EXISTS click_events CASCADE;`,
-	},
 }
