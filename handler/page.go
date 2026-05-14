@@ -24,13 +24,6 @@ func ShortenPage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func ApiPage(w http.ResponseWriter, r *http.Request) {
-	render.Page(w, "api.html", render.ViewData{
-		Title: "API",
-		Page:  "api",
-	})
-}
-
 func StatsPage(w http.ResponseWriter, r *http.Request) {
 	alias := chi.URLParam(r, "alias")
 

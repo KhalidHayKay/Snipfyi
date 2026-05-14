@@ -8,6 +8,7 @@ import (
 	"smply/internal/storage"
 	"smply/internal/tasks"
 	"smply/internal/worker"
+	"smply/middleware"
 
 	"github.com/hibiken/asynq"
 )
@@ -15,7 +16,8 @@ import (
 func Start() {
 	config.LoadEnv()
 
-	if err := storage.InitDB(); err != nil {
+	db, err := storage.InitDB()
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -25,7 +27,11 @@ func Start() {
 
 	queue.Init()
 
-	router := setupRouter()
+	handlers, services := Bootstrap(db)
+
+	middleware := middleware.NewMiddleware(services.APIKey)
+
+	router := setupRouter(handlers, middleware)
 
 	log.Println("Starting server...")
 	log.Fatal(http.ListenAndServe(":"+config.Env.App.Port, router))
@@ -34,7 +40,7 @@ func Start() {
 func StartWorker() {
 	config.LoadEnv()
 
-	if err := storage.InitDB(); err != nil {
+	if _, err := storage.InitDB(); err != nil {
 		log.Fatal(err)
 	}
 

@@ -4,11 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"smply/internal/storage"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func migrateUp(ctx context.Context) {
-	_, err := storage.DB.Exec(ctx, `
+type CLIHandler struct {
+	db *pgxpool.Pool
+}
+
+func NewCLIHandler(db *pgxpool.Pool) *CLIHandler {
+	return &CLIHandler{db}
+}
+
+func (h *CLIHandler) migrateUp(ctx context.Context) {
+	_, err := h.db.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS schema_migrations (
 			id SERIAL PRIMARY KEY,
 			name TEXT UNIQUE NOT NULL,
@@ -24,7 +33,7 @@ func migrateUp(ctx context.Context) {
 	for _, m := range migrations {
 		var exists bool
 
-		err := storage.DB.QueryRow(ctx,
+		err := h.db.QueryRow(ctx,
 			`SELECT EXISTS (SELECT 1 FROM schema_migrations WHERE name=$1)`,
 			m.Name,
 		).Scan(&exists)
@@ -36,12 +45,12 @@ func migrateUp(ctx context.Context) {
 			continue
 		}
 
-		_, err = storage.DB.Exec(ctx, m.Up)
+		_, err = h.db.Exec(ctx, m.Up)
 		if err != nil {
 			log.Fatalf("Migration failed: %s\n%v", m.Name, err)
 		}
 
-		_, err = storage.DB.Exec(ctx,
+		_, err = h.db.Exec(ctx,
 			`INSERT INTO schema_migrations (name) VALUES ($1)`,
 			m.Name,
 		)
@@ -59,8 +68,8 @@ func migrateUp(ctx context.Context) {
 	}
 }
 
-func migrateDown(ctx context.Context) {
-	schemas, err := getSchemas(ctx)
+func (h *CLIHandler) migrateDown(ctx context.Context) {
+	schemas, err := h.getSchemas(ctx)
 	if err != nil {
 		log.Fatalf("Schema migrations fetch error: %s", err)
 	}
@@ -86,13 +95,13 @@ func migrateDown(ctx context.Context) {
 		}
 
 		// run DOWN
-		_, err = storage.DB.Exec(ctx, target.Down)
+		_, err = h.db.Exec(ctx, target.Down)
 		if err != nil {
 			log.Fatalf("Rollback failed: %s\n%v", target.Name, err)
 		}
 
 		// remove from schema_migrations
-		_, err = storage.DB.Exec(ctx,
+		_, err = h.db.Exec(ctx,
 			`DELETE FROM schema_migrations WHERE name=$1`,
 			target.Name,
 		)
@@ -104,8 +113,8 @@ func migrateDown(ctx context.Context) {
 	}
 }
 
-func migrationStatus(ctx context.Context) {
-	schemas, err := getSchemas(ctx)
+func (h *CLIHandler) migrationStatus(ctx context.Context) {
+	schemas, err := h.getSchemas(ctx)
 	if err != nil {
 		log.Fatalf("Schema migrations fetch err: %s", err)
 	}
@@ -124,13 +133,43 @@ func migrationStatus(ctx context.Context) {
 	}
 }
 
-func resetDB(ctx context.Context) {
+func (h *CLIHandler) resetDB(ctx context.Context) {
 	log.Println("Migrating down...")
-	migrateDown(ctx)
+	h.migrateDown(ctx)
 	log.Println("Migrating up...")
-	migrateUp(ctx)
+	h.migrateUp(ctx)
 }
 
-func seedDB() {
+func (h *CLIHandler) seedDB() {
 	fmt.Println("No seed logic implemented yet.")
+}
+
+func (h *CLIHandler) getSchemas(ctx context.Context) (schemas []Schema, err error) {
+	rows, err := h.db.Query(ctx, `
+		SELECT id, name, applied_at
+		FROM schema_migrations
+		ORDER BY id DESC
+		LIMIT 5
+	`)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var schema Schema
+		if err = rows.Scan(
+			&schema.Id,
+			&schema.Name,
+			&schema.AppliedAt,
+		); err != nil {
+			return
+		}
+		schemas = append(schemas, schema)
+	}
+
+	err = rows.Err()
+
+	return
 }

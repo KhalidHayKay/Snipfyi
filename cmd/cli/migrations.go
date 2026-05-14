@@ -1,24 +1,5 @@
 package main
 
-var commandMap = map[string]Command{
-	"db:migrate up": {
-		Run:         migrateUp,
-		Destructive: false,
-	},
-	"db:migrate down": {
-		Run:         migrateDown,
-		Destructive: true,
-	},
-	"db:migrate status": {
-		Run:         migrationStatus,
-		Destructive: false,
-	},
-	"db:reset": {
-		Run:         resetDB,
-		Destructive: true,
-	},
-}
-
 var migrations = []Migration{
 	{
 		Name: "000001_create_urls_table",
@@ -68,5 +49,10 @@ var migrations = []Migration{
 			timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);`,
 		Down: `DROP TABLE IF EXISTS click_events CASCADE;`,
+	},
+	{
+		Name: "000004_remove_expires_at_from_api_keys",
+		Up:   `ALTER TABLE api_keys DROP COLUMN expires_at;`,
+		Down: `ALTER TABLE api_keys ADD COLUMN expires_at TIMESTAMP NOT NULL;`,
 	},
 }

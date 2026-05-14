@@ -1,42 +1,30 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"fmt"
 	"log"
-	"os"
 	"smply/config"
 	"smply/internal/storage"
-	"strings"
 )
 
 func main() {
-	input := strings.Join(os.Args[1:], " ")
-
-	cmd, ok := commandMap[input]
-	if !ok {
-		log.Fatalf("Unknown command: %s", input)
-	}
-
 	config.LoadEnv()
-	if err := storage.InitDB(); err != nil {
+
+	db, err := storage.InitDB()
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	if cmd.Destructive {
-		fmt.Print("⚠️  This is a destructive operation. Type 'yes' to proceed: ")
+	handler := NewCLIHandler(db)
 
-		reader := bufio.NewReader(os.Stdin)
-		response, _ := reader.ReadString('\n')
+	command := NewCMD()
 
-		if strings.TrimSpace(response) != "yes" {
-			fmt.Println("Aborted.")
-			return
-		}
-	}
+	command.Add("db:migrate up", handler.migrateUp, false)
+	command.Add("db:migrate down", handler.migrateDown, true)
+	command.Add("db:migrate status", handler.migrationStatus, false)
+	command.Add("db:reset", handler.resetDB, true)
 
 	ctx := context.Background()
 
-	cmd.Run(ctx)
+	command.Run(ctx)
 }

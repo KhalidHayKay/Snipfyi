@@ -69,17 +69,17 @@ Create `compose.override.yaml` in the project root:
 
 ```yaml
 services:
- app:
-  volumes:
-   - ./:/app
-   - go-module-cache:/root/go/pkg/mod
+  app:
+    volumes:
+      - ./:/app
+      - go-module-cache:/root/go/pkg/mod
   worker:
     volumes:
-   - ./:/app
-   - go-module-cache:/root/go/pkg/mod
+      - ./:/app
+      - go-module-cache:/root/go/pkg/mod
 
 volumes:
- go-module-cache:
+  go-module-cache:
 ```
 
 > **Why is this not committed?**
@@ -151,7 +151,7 @@ Content-Type: application/json
 
 ```json
 {
-	"short_url": "https://smply.app/aB3xZ"
+  "short_url": "https://smply.app/aB3xZ"
 }
 ```
 
