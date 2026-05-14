@@ -58,7 +58,7 @@ func ValidateAPIKey(ctx context.Context, key string) (bool, error) {
 	err := storage.DB.QueryRow(ctx, `
 		SELECT EXISTS (
 			SELECT 1 FROM api_keys
-			WHERE key_hash = $1 AND expires_at > NOW()
+			WHERE key_hash = $1
 		)
 	`, utils.Hash(key)).Scan(&exists)
 

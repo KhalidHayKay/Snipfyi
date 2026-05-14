@@ -4,12 +4,21 @@ import (
 	"log"
 	"net/http"
 	"smply/config"
+	"smply/internal/apikey"
 	"smply/internal/render"
 	"smply/internal/service"
 	"strings"
 )
 
-func CORSMiddleware(next http.Handler) http.Handler {
+type Middleware struct {
+	apikeyService *apikey.Service
+}
+
+func NewMiddleware(apikeyService *apikey.Service) *Middleware {
+	return &Middleware{apikeyService}
+}
+
+func (m *Middleware) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -24,7 +33,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func RequireKey(next http.Handler) http.Handler {
+func (m *Middleware) RequireKey(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		key := r.Header.Get("X-API-Key")
 		if key == "" {
@@ -32,7 +41,7 @@ func RequireKey(next http.Handler) http.Handler {
 			return
 		}
 
-		valid, err := service.ValidateAPIKey(r.Context(), key)
+		valid, err := m.apikeyService.Validate(r.Context(), key)
 		if err != nil {
 			log.Println("Error validating API key:", err)
 			render.ErrorJSON(w, http.StatusInternalServerError, "Internal server error")
@@ -48,7 +57,7 @@ func RequireKey(next http.Handler) http.Handler {
 	})
 }
 
-func AdminAuthenticationMiddleware(next http.Handler) http.Handler {
+func (m *Middleware) AuthenticateAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
 
@@ -60,7 +69,7 @@ func AdminAuthenticationMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func AdminGuestMiddleware(next http.Handler) http.Handler {
+func (m *Middleware) AdminGuest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
 

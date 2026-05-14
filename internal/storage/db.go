@@ -10,20 +10,22 @@ import (
 
 var DB *pgxpool.Pool
 
-func InitDB() error {
+func InitDB() (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var err error
-	DB, err = pgxpool.New(ctx, config.Env.DbUrl)
+	db, err := pgxpool.New(ctx, config.Env.DbUrl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = DB.Ping(ctx)
+	err = db.Ping(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	// TODO: remove global variable
+	DB = db
+
+	return db, nil
 }

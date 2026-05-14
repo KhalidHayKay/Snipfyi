@@ -10,11 +10,11 @@ import (
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func setupRouter() *chi.Mux {
+func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux {
 	router := chi.NewRouter()
 
 	// Global middleware
-	router.Use(middleware.CORSMiddleware, chiMiddleware.Logger, chiMiddleware.Recoverer)
+	router.Use(middleware.CORS, chiMiddleware.Logger, chiMiddleware.Recoverer)
 
 	// Rate limiters
 	keyRequestRateLimiter := limiter.NewRateLimiter(2/60.0, 2)
@@ -27,22 +27,22 @@ func setupRouter() *chi.Mux {
 	// TODO: rate limit
 	router.Post("/shorten", handler.ShortenForm)
 
-	router.Get("/api", handler.ApiPage)
-	router.With(keyRequestRateLimiter.Middleware).Post("/api", handler.RequestApiKey)
+	router.Get("/api", handlers.APIKey.Page)
+	router.With(keyRequestRateLimiter.Middleware).Post("/api", handlers.APIKey.Request)
 
 	router.Get("/stats/{alias}", handler.StatsPage)
 
-	router.Get("/key/activate", handler.CreateApiKey)
+	router.Get("/key/activate", handlers.APIKey.Create)
 
 	router.Route("/admin", func(r chi.Router) {
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.AdminGuestMiddleware)
+			r.Use(middleware.AdminGuest)
 			r.Get("/login", handler.AdminLoginPage)
 		})
 		r.Post("/login", handler.AdminLogin)
 
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.AdminAuthenticationMiddleware)
+			r.Use(middleware.AuthenticateAdmin)
 			r.Get("/stats", handler.AdminStats)
 		})
 

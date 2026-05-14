@@ -24,7 +24,7 @@ services:
       - db
       - redis
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: smply-db
     restart: unless-stopped
     environment:
