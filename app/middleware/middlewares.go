@@ -94,25 +94,27 @@ func (m *Middleware) AdminGuest(next http.Handler) http.Handler {
 	})
 }
 
-func (m *Middleware) RateLimit(rl *limiter.RateLimiter, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		key := r.Header.Get("X-API-Key")
-		if key == "" {
-			key = utils.GetClientIP(r)
-		}
+func (m *Middleware) RateLimit(conf *limiter.Config) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			key := r.Header.Get("X-API-Key")
+			if key == "" {
+				key = utils.GetClientIP(r)
+			}
 
-		limiter, _ := m.limiterService.Load(r.Context(), key, rl.Rate, rl.Burst)
-		defer m.limiterService.Save(r.Context(), key, limiter)
+			limiter, _ := m.limiterService.Load(r.Context(), key, conf)
+			defer m.limiterService.Save(r.Context(), key, limiter)
 
-		if !limiter.Allow() {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusTooManyRequests)
-			json.NewEncoder(w).Encode(map[string]string{
-				"error": "rate limit exceeded",
-			})
-			return
-		}
+			if !limiter.Allow() {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusTooManyRequests)
+				json.NewEncoder(w).Encode(map[string]string{
+					"error": "rate limit exceeded",
+				})
+				return
+			}
 
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }

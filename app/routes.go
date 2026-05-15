@@ -5,6 +5,7 @@ import (
 	"smply/app/middleware"
 	"smply/internal/home"
 	"smply/internal/limiter"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
@@ -17,8 +18,16 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 	router.Use(middleware.CORS, chiMiddleware.Logger, chiMiddleware.Recoverer)
 
 	// Rate limiters
-	keyRequestRateLimiter := limiter.NewRateLimiter(2/60.0, 2)
-	publicAPIRateLimiter := limiter.NewRateLimiter(10/60.0, 10)
+	keyRequestRateLimitConfig := limiter.Config{
+		Every: time.Minute,
+		Rate:  2,
+		Burst: 2,
+	}
+	publicAPIRateLimitConfig := limiter.Config{
+		Every: 60 * time.Minute,
+		Rate:  10,
+		Burst: 10,
+	}
 
 	// Page routes
 	router.Get("/", home.Page)
@@ -28,7 +37,7 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 	router.Post("/shorten", handlers.URL.HandleShortenForm)
 
 	router.Get("/api", handlers.APIKey.Page)
-	router.With(keyRequestRateLimiter.Middleware).Post("/api", handlers.APIKey.Request)
+	router.With(middleware.RateLimit(&keyRequestRateLimitConfig)).Post("/api", handlers.APIKey.Request)
 
 	router.Get("/stats/{alias}", handlers.Stat.Page)
 
@@ -58,7 +67,7 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 
 	// Public API routes with rate limiting and key validation
 	router.Route("/api/v1", func(r chi.Router) {
-		r.Use(publicAPIRateLimiter.Middleware)
+		r.Use(middleware.RateLimit(&publicAPIRateLimitConfig))
 		r.Use(middleware.RequireKey)
 
 		r.Post("/shorten", handlers.URL.Shorten)
