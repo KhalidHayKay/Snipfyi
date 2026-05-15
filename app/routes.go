@@ -2,9 +2,9 @@ package app
 
 import (
 	"net/http"
-	"smply/handler"
+	"smply/app/middleware"
+	"smply/internal/home"
 	"smply/internal/limiter"
-	"smply/middleware"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
@@ -21,39 +21,39 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 	publicAPIRateLimiter := limiter.NewRateLimiter(10/60.0, 10)
 
 	// Page routes
-	router.Get("/", handler.Home)
-	router.Get("/shorten", handler.ShortenPage)
+	router.Get("/", home.Page)
+	router.Get("/shorten", handlers.URL.ShortenPage)
 
 	// TODO: rate limit
-	router.Post("/shorten", handler.ShortenForm)
+	router.Post("/shorten", handlers.URL.HandleShortenForm)
 
 	router.Get("/api", handlers.APIKey.Page)
 	router.With(keyRequestRateLimiter.Middleware).Post("/api", handlers.APIKey.Request)
 
-	router.Get("/stats/{alias}", handler.StatsPage)
+	router.Get("/stats/{alias}", handlers.Stat.Page)
 
 	router.Get("/key/activate", handlers.APIKey.Create)
 
 	router.Route("/admin", func(r chi.Router) {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.AdminGuest)
-			r.Get("/login", handler.AdminLoginPage)
+			r.Get("/login", handlers.Admin.Page)
 		})
-		r.Post("/login", handler.AdminLogin)
+		r.Post("/login", handlers.Admin.Login)
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.AuthenticateAdmin)
-			r.Get("/stats", handler.AdminStats)
+			r.Get("/stats", handlers.Stat.GetForAdmin)
 		})
 
-		r.Get("/auth/redirect", handler.AdminAuth)
+		r.Get("/auth/redirect", handlers.Admin.Auth)
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/admin/stats", http.StatusFound)
 		})
 	})
 
-	router.Get("/{alias}", handler.ResolveRedirect)
+	router.Get("/{alias}", handlers.URL.Redirect)
 	// Note: Specific stats routes should be defined before the catch-all redirect route to avoid conflicts
 
 	// Public API routes with rate limiting and key validation
@@ -61,9 +61,9 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 		r.Use(publicAPIRateLimiter.Middleware)
 		r.Use(middleware.RequireKey)
 
-		r.Post("/shorten", handler.Shorten)
-		r.Get("/stats/{alias}", handler.Stats)
-		r.Get("/redirect/{alias}", handler.RedirectAPI)
+		r.Post("/shorten", handlers.URL.Shorten)
+		r.Get("/stats/{alias}", handlers.Stat.Get)
+		r.Get("/show/{alias}", handlers.URL.Get)
 	})
 
 	// Static files

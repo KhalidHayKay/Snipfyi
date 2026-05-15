@@ -3,12 +3,10 @@ package app
 import (
 	"log"
 	"net/http"
+	"smply/app/storage"
 	"smply/config"
 	"smply/internal/queue"
-	"smply/internal/storage"
 	"smply/internal/tasks"
-	"smply/internal/worker"
-	"smply/middleware"
 
 	"github.com/hibiken/asynq"
 )
@@ -21,17 +19,16 @@ func Start() {
 		log.Fatal(err)
 	}
 
-	if err := storage.InitCache(); err != nil {
+	cache, err := storage.InitCache()
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	queue.Init()
 
-	handlers, services := Bootstrap(db)
+	app := Bootstrap(db, cache)
 
-	middleware := middleware.NewMiddleware(services.APIKey)
-
-	router := setupRouter(handlers, middleware)
+	router := setupRouter(app.Handlers, app.Middleware)
 
 	log.Println("Starting server...")
 	log.Fatal(http.ListenAndServe(":"+config.Env.App.Port, router))
@@ -40,9 +37,18 @@ func Start() {
 func StartWorker() {
 	config.LoadEnv()
 
-	if _, err := storage.InitDB(); err != nil {
+	db, err := storage.InitDB()
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	cache, err := storage.InitCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	app := Bootstrap(db, cache)
+	worker := app.Handlers.Worker
 
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{
@@ -61,9 +67,10 @@ func StartWorker() {
 	)
 
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(tasks.TypeAPIKeyMagicLinkEmail, worker.HandleAPIKeyMagicLinkEmail)
-	mux.HandleFunc(tasks.TypeStatsUpdate, worker.HandleStatsUpdate)
-	mux.HandleFunc(tasks.TypeAdminLoginMagicLinkEmail, worker.HandleAdminLoginMagicLinkEmail)
+
+	mux.HandleFunc(tasks.TypeAPIKeyMagicLinkEmail, worker.APIKeyMagicLinkEmail)
+	mux.HandleFunc(tasks.TypeStatsUpdate, worker.StatsUpdate)
+	mux.HandleFunc(tasks.TypeAdminLoginMagicLinkEmail, worker.AdminLoginMagicLinkEmail)
 
 	if err := srv.Run(mux); err != nil {
 		log.Fatal(err)

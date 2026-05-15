@@ -2,7 +2,6 @@ package apikey
 
 import (
 	"context"
-	"log"
 	"smply/utils"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,7 +30,6 @@ func (r PostgresRepo) Create(ctx context.Context, email, key string) (APIKey, er
 	)
 
 	if err != nil {
-		log.Printf("error creating API key: %v", err)
 		return APIKey{}, err
 	}
 
@@ -53,7 +51,6 @@ func (r PostgresRepo) FindByHash(ctx context.Context, keyHash string) (*APIKey, 
 	)
 
 	if err != nil {
-		log.Printf("error finding API key: %v", err)
 		return nil, err
 	}
 
@@ -67,7 +64,6 @@ func (r PostgresRepo) RevokeAll(ctx context.Context, email string) error {
 			WHERE owner_email = $1
 	`, email)
 	if err != nil {
-		log.Printf("error revoking API keys: %v", err)
 		return err
 	}
 

@@ -1,21 +1,34 @@
 package middleware
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"smply/app/render"
 	"smply/config"
 	"smply/internal/apikey"
-	"smply/internal/render"
-	"smply/internal/service"
+	"smply/internal/limiter"
+	"smply/internal/session"
+	"smply/utils"
 	"strings"
 )
 
 type Middleware struct {
-	apikeyService *apikey.Service
+	apikeyService  *apikey.Service
+	sessionService *session.Service
+	limiterService *limiter.Service
 }
 
-func NewMiddleware(apikeyService *apikey.Service) *Middleware {
-	return &Middleware{apikeyService}
+func NewMiddleware(
+	apikeyService *apikey.Service,
+	sessionService *session.Service,
+	limiterService *limiter.Service,
+) *Middleware {
+	return &Middleware{
+		apikeyService:  apikeyService,
+		sessionService: sessionService,
+		limiterService: limiterService,
+	}
 }
 
 func (m *Middleware) CORS(next http.Handler) http.Handler {
@@ -61,7 +74,7 @@ func (m *Middleware) AuthenticateAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
 
-		if err != nil || !service.ValidateSession(r.Context(), sessionId.Value) {
+		if err != nil || !m.sessionService.ValidateSession(r.Context(), sessionId.Value) {
 			http.Redirect(w, r, "/admin/login", http.StatusFound)
 		}
 
@@ -73,8 +86,31 @@ func (m *Middleware) AdminGuest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionId, err := r.Cookie(strings.ToLower(config.Env.App.Name) + "_session_id")
 
-		if err == nil && service.ValidateSession(r.Context(), sessionId.Value) {
+		if err == nil && m.sessionService.ValidateSession(r.Context(), sessionId.Value) {
 			http.Redirect(w, r, "/admin", http.StatusFound)
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *Middleware) RateLimit(rl *limiter.RateLimiter, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		key := r.Header.Get("X-API-Key")
+		if key == "" {
+			key = utils.GetClientIP(r)
+		}
+
+		limiter, _ := m.limiterService.Load(r.Context(), key, rl.Rate, rl.Burst)
+		defer m.limiterService.Save(r.Context(), key, limiter)
+
+		if !limiter.Allow() {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "rate limit exceeded",
+			})
+			return
 		}
 
 		next.ServeHTTP(w, r)

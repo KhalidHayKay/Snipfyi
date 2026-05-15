@@ -43,12 +43,11 @@ func NewAPIKeyMagicLinkEmailTask(email, token string) (*asynq.Task, error) {
 	return asynq.NewTask(TypeAPIKeyMagicLinkEmail, payload), nil
 }
 
-func NewStatsUpdateTask(urlAlias, referer, userAgent, ipAddress string, timestamp time.Time) (*asynq.Task, error) {
+func NewStatsUpdateTask(urlAlias, referer, userAgent string, timestamp time.Time) (*asynq.Task, error) {
 	payload, err := json.Marshal(StatsUpdatePayload{
 		UrlAlias:  urlAlias,
 		Referer:   referer,
 		UserAgent: userAgent,
-		IpAddress: ipAddress,
 		Timestamp: timestamp,
 	})
 	if err != nil {
