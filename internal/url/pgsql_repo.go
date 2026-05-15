@@ -8,15 +8,15 @@ import (
 )
 
 type PostgresRepo struct {
-	db *pgxpool.Pool
+	pgsql *pgxpool.Pool
 }
 
-func NewPostgresRepo(db *pgxpool.Pool) *PostgresRepo {
-	return &PostgresRepo{db: db}
+func NewPostgresRepo(pgsql *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{pgsql}
 }
 
 func (r *PostgresRepo) Store(ctx context.Context, url string, alias string) (Url, error) {
-	tx, err := r.db.Begin(ctx)
+	tx, err := r.pgsql.Begin(ctx)
 	if err != nil {
 		return Url{}, err
 	}
@@ -62,7 +62,7 @@ func (r *PostgresRepo) Store(ctx context.Context, url string, alias string) (Url
 func (r *PostgresRepo) GetExact(ctx context.Context, originalUrl, alias string) (*Url, error) {
 	var url Url
 
-	err := r.db.QueryRow(
+	err := r.pgsql.QueryRow(
 		ctx,
 		`SELECT id, original, alias FROM urls 
 			WHERE original = $1 AND alias = $2`,
@@ -81,7 +81,7 @@ func (r *PostgresRepo) GetExact(ctx context.Context, originalUrl, alias string) 
 func (r *PostgresRepo) GetByAlias(ctx context.Context, alias string) (Url, error) {
 	var url Url
 
-	err := r.db.QueryRow(
+	err := r.pgsql.QueryRow(
 		ctx,
 		`SELECT id, original, alias FROM urls WHERE alias = $1`,
 		alias).Scan(

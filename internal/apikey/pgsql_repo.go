@@ -8,17 +8,17 @@ import (
 )
 
 type PostgresRepo struct {
-	db *pgxpool.Pool
+	pgsql *pgxpool.Pool
 }
 
-func NewPostgresRepo(db *pgxpool.Pool) *PostgresRepo {
-	return &PostgresRepo{db}
+func NewPostgresRepo(pgsql *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{pgsql}
 }
 
 func (r PostgresRepo) Create(ctx context.Context, email, key string) (APIKey, error) {
 	var apiKey APIKey
 
-	err := r.db.QueryRow(ctx, `
+	err := r.pgsql.QueryRow(ctx, `
 		INSERT INTO api_keys (owner_email, key_hash, created_at)
 		VALUES ($1, $2, NOW())
 		RETURNING id, owner_email, key_hash, created_at
@@ -39,7 +39,7 @@ func (r PostgresRepo) Create(ctx context.Context, email, key string) (APIKey, er
 func (r PostgresRepo) FindByHash(ctx context.Context, keyHash string) (*APIKey, error) {
 	var apiKey APIKey
 
-	err := r.db.QueryRow(ctx, `
+	err := r.pgsql.QueryRow(ctx, `
 		SELECT id, owner_email, key_hash, created_at
 		FROM api_keys
 		WHERE key_hash = $1
@@ -58,7 +58,7 @@ func (r PostgresRepo) FindByHash(ctx context.Context, keyHash string) (*APIKey, 
 }
 
 func (r PostgresRepo) RevokeAll(ctx context.Context, email string) error {
-	_, err := r.db.Exec(ctx, `
+	_, err := r.pgsql.Exec(ctx, `
 		UPDATE api_keys
 			SET revoked_at = NOW()
 			WHERE owner_email = $1

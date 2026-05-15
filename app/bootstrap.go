@@ -5,9 +5,9 @@ import (
 	"smply/config"
 	"smply/internal/admin"
 	"smply/internal/apikey"
-	"smply/internal/limiter"
 	"smply/internal/magictoken"
 	"smply/internal/mail"
+	"smply/internal/ratelimiter"
 	"smply/internal/session"
 	"smply/internal/stat"
 	"smply/internal/url"
@@ -31,21 +31,21 @@ type App struct {
 	Middleware *middleware.Middleware
 }
 
-func Bootstrap(db *pgxpool.Pool, cache *redis.Client) App {
-	magicTokenRepo := magictoken.NewPostgresRepo(db)
+func Bootstrap(pgsql *pgxpool.Pool, cache *redis.Client) App {
+	magicTokenRepo := magictoken.NewPostgresRepo(pgsql)
 	magicTokenService := magictoken.NewService(magicTokenRepo)
 
-	apikeyRepo := apikey.NewPostgresRepo(db)
+	apikeyRepo := apikey.NewPostgresRepo(pgsql)
 	apiKeyService := apikey.NewService(apikeyRepo, magicTokenService)
 
 	sessionService := session.NewService(cache)
 
 	adminService := admin.NewService(magicTokenService, sessionService)
 
-	urlRepo := url.NewPostgresRepo(db)
+	urlRepo := url.NewPostgresRepo(pgsql)
 	urlService := url.NewService(urlRepo)
 
-	statRepo := stat.NewPostresRepo(db)
+	statRepo := stat.NewPostresRepo(pgsql)
 	statService := stat.NewService(statRepo)
 
 	mailService := mail.NewService(gomail.NewDialer(
@@ -55,7 +55,7 @@ func Bootstrap(db *pgxpool.Pool, cache *redis.Client) App {
 		config.Env.Mailer.Pass,
 	))
 
-	rateLimiterService := limiter.NewService(cache)
+	rateLimiterService := ratelimiter.NewService(cache)
 
 	workerHandler := worker.NewHandler(statService, mailService)
 

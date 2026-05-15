@@ -10,12 +10,12 @@ import (
 func main() {
 	config.LoadEnv()
 
-	db, err := storage.InitDB()
+	pgsql, err := storage.InitPostgres()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	handler := NewCLIHandler(db)
+	handler := NewCLIHandler(pgsql)
 
 	command := NewCMD()
 

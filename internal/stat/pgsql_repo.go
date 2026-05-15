@@ -8,15 +8,15 @@ import (
 )
 
 type PostgresRepo struct {
-	db *pgxpool.Pool
+	pgsql *pgxpool.Pool
 }
 
-func NewPostresRepo(db *pgxpool.Pool) *PostgresRepo {
-	return &PostgresRepo{db: db}
+func NewPostresRepo(pgsql *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{pgsql}
 }
 
 func (r *PostgresRepo) Run(ctx context.Context, alias, referer, userAgent string, timestamp time.Time) error {
-	tx, err := r.db.Begin(ctx)
+	tx, err := r.pgsql.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (r *PostgresRepo) Run(ctx context.Context, alias, referer, userAgent string
 func (r *PostgresRepo) Get(ctx context.Context, alias string) (Stats, error) {
 	var stats Stats
 
-	err := r.db.QueryRow(ctx,
+	err := r.pgsql.QueryRow(ctx,
 		`SELECT original, alias, visited, created, last_visited FROM urls WHERE alias = $1`,
 		alias).Scan(
 		&stats.Original,
@@ -71,53 +71,53 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	var s AdminStats
 
 	// ── URLs ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM urls`,
 	).Scan(&s.TotalUrls); err != nil {
 		return s, err
 	}
 
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM urls WHERE DATE(created) = CURRENT_DATE`,
 	).Scan(&s.UrlsToday); err != nil {
 		return s, err
 	}
 
 	// ── Total redirects (from urls.visited) ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COALESCE(SUM(visited), 0) FROM urls`,
 	).Scan(&s.TotalRedirects); err != nil {
 		return s, err
 	}
 
 	// ── Click events: totals ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events`,
 	).Scan(&s.TotalClicks); err != nil {
 		return s, err
 	}
 
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events WHERE DATE(timestamp) = CURRENT_DATE`,
 	).Scan(&s.ClicksToday); err != nil {
 		return s, err
 	}
 
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events WHERE timestamp >= NOW() - INTERVAL '7 days'`,
 	).Scan(&s.ClicksThisWeek); err != nil {
 		return s, err
 	}
 
 	// ── Unique links ever clicked ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(DISTINCT url_id) FROM click_events`,
 	).Scan(&s.UniqueLinksClicked); err != nil {
 		return s, err
 	}
 
 	// ── Peak day (soft error — no data yet is fine) ──
-	_ = r.db.QueryRow(ctx, `
+	_ = r.pgsql.QueryRow(ctx, `
 		SELECT TO_CHAR(DATE(timestamp), 'Mon DD, YYYY'), COUNT(*)
 		FROM click_events
 		GROUP BY DATE(timestamp)
@@ -126,7 +126,7 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	`).Scan(&s.PeakDay, new(int64))
 
 	// ── Peak hour 0–23 ──
-	_ = r.db.QueryRow(ctx, `
+	_ = r.pgsql.QueryRow(ctx, `
 		SELECT EXTRACT(HOUR FROM timestamp)::int, COUNT(*) AS cnt
 		FROM click_events
 		GROUP BY EXTRACT(HOUR FROM timestamp)
@@ -135,7 +135,7 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	`).Scan(&s.PeakHour, &s.PeakHourClicks)
 
 	// ── Daily trend — last 7 days (always 7 rows via generate_series) ──
-	trendRows, err := r.db.Query(ctx, `
+	trendRows, err := r.pgsql.Query(ctx, `
 		SELECT TO_CHAR(gs::date, 'Mon DD') AS day, COALESCE(c.clicks, 0)
 		FROM generate_series(
 			(CURRENT_DATE - INTERVAL '6 days')::timestamp,
@@ -162,7 +162,7 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Top 5 links by clicks ──
-	topRows, err := r.db.Query(ctx, `
+	topRows, err := r.pgsql.Query(ctx, `
 		SELECT u.alias, COUNT(c.id) AS clicks
 		FROM urls u
 		JOIN click_events c ON c.url_id = u.id
@@ -183,7 +183,7 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Top 5 referers ──
-	refRows, err := r.db.Query(ctx, `
+	refRows, err := r.pgsql.Query(ctx, `
 		SELECT
 			CASE WHEN referer = '' OR referer IS NULL THEN 'Direct' ELSE referer END,
 			COUNT(*) AS clicks
@@ -205,7 +205,7 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Device breakdown (SQL-level UA bucketing) ──
-	devRows, err := r.db.Query(ctx, `
+	devRows, err := r.pgsql.Query(ctx, `
 		SELECT
 			CASE
 				WHEN user_agent ILIKE '%mobile%'
@@ -234,13 +234,13 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── API keys ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM api_keys`,
 	).Scan(&s.TotalApiKeys); err != nil {
 		return s, err
 	}
 
-	if err := r.db.QueryRow(ctx, `
+	if err := r.pgsql.QueryRow(ctx, `
 		SELECT COUNT(*) FROM api_keys
 		WHERE expires_at > NOW() AND last_used_at IS NULL
 	`).Scan(&s.ActiveApiKeys); err != nil {
@@ -248,13 +248,13 @@ func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Magic tokens ──
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM magic_tokens`,
 	).Scan(&s.TotalTokens); err != nil {
 		return s, err
 	}
 
-	if err := r.db.QueryRow(ctx,
+	if err := r.pgsql.QueryRow(ctx,
 		`SELECT COUNT(*) FROM magic_tokens WHERE DATE(created_at) = CURRENT_DATE`,
 	).Scan(&s.TokensToday); err != nil {
 		return s, err
