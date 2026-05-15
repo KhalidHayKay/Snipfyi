@@ -9,15 +9,15 @@ import (
 )
 
 type CLIHandler struct {
-	db *pgxpool.Pool
+	pgsql *pgxpool.Pool
 }
 
-func NewCLIHandler(db *pgxpool.Pool) *CLIHandler {
-	return &CLIHandler{db}
+func NewCLIHandler(pgsql *pgxpool.Pool) *CLIHandler {
+	return &CLIHandler{pgsql}
 }
 
 func (h *CLIHandler) migrateUp(ctx context.Context) {
-	_, err := h.db.Exec(ctx, `
+	_, err := h.pgsql.Exec(ctx, `
 		CREATE TABLE IF NOT EXISTS schema_migrations (
 			id SERIAL PRIMARY KEY,
 			name TEXT UNIQUE NOT NULL,
@@ -33,7 +33,7 @@ func (h *CLIHandler) migrateUp(ctx context.Context) {
 	for _, m := range migrations {
 		var exists bool
 
-		err := h.db.QueryRow(ctx,
+		err := h.pgsql.QueryRow(ctx,
 			`SELECT EXISTS (SELECT 1 FROM schema_migrations WHERE name=$1)`,
 			m.Name,
 		).Scan(&exists)
@@ -45,12 +45,12 @@ func (h *CLIHandler) migrateUp(ctx context.Context) {
 			continue
 		}
 
-		_, err = h.db.Exec(ctx, m.Up)
+		_, err = h.pgsql.Exec(ctx, m.Up)
 		if err != nil {
 			log.Fatalf("Migration failed: %s\n%v", m.Name, err)
 		}
 
-		_, err = h.db.Exec(ctx,
+		_, err = h.pgsql.Exec(ctx,
 			`INSERT INTO schema_migrations (name) VALUES ($1)`,
 			m.Name,
 		)
@@ -95,13 +95,13 @@ func (h *CLIHandler) migrateDown(ctx context.Context) {
 		}
 
 		// run DOWN
-		_, err = h.db.Exec(ctx, target.Down)
+		_, err = h.pgsql.Exec(ctx, target.Down)
 		if err != nil {
 			log.Fatalf("Rollback failed: %s\n%v", target.Name, err)
 		}
 
 		// remove from schema_migrations
-		_, err = h.db.Exec(ctx,
+		_, err = h.pgsql.Exec(ctx,
 			`DELETE FROM schema_migrations WHERE name=$1`,
 			target.Name,
 		)
@@ -145,7 +145,7 @@ func (h *CLIHandler) seedDB() {
 }
 
 func (h *CLIHandler) getSchemas(ctx context.Context) (schemas []Schema, err error) {
-	rows, err := h.db.Query(ctx, `
+	rows, err := h.pgsql.Query(ctx, `
 		SELECT id, name, applied_at
 		FROM schema_migrations
 		ORDER BY id DESC

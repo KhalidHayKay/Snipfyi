@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"smply/app/middleware"
 	"smply/internal/home"
-	"smply/internal/limiter"
+	"smply/internal/ratelimiter"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -18,12 +18,12 @@ func setupRouter(handlers Handlers, middleware *middleware.Middleware) *chi.Mux 
 	router.Use(middleware.CORS, chiMiddleware.Logger, chiMiddleware.Recoverer)
 
 	// Rate limiters
-	keyRequestRateLimitConfig := limiter.Config{
+	keyRequestRateLimitConfig := ratelimiter.Config{
 		Every: time.Minute,
 		Rate:  2,
 		Burst: 2,
 	}
-	publicAPIRateLimitConfig := limiter.Config{
+	publicAPIRateLimitConfig := ratelimiter.Config{
 		Every: 60 * time.Minute,
 		Rate:  10,
 		Burst: 10,

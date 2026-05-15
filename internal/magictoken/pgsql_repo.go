@@ -7,15 +7,15 @@ import (
 )
 
 type PostgresRepo struct {
-	db *pgxpool.Pool
+	pgsql *pgxpool.Pool
 }
 
-func NewPostgresRepo(db *pgxpool.Pool) *PostgresRepo {
-	return &PostgresRepo{db}
+func NewPostgresRepo(pgsql *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{pgsql}
 }
 
 func (r PostgresRepo) Create(ctx context.Context, email, tokenHash string) error {
-	_, err := r.db.Exec(ctx, `
+	_, err := r.pgsql.Exec(ctx, `
 		INSERT INTO magic_tokens (email, token_hash, expires_at, created_at)
 			VALUES ($1, $2, NOW() + INTERVAL '15 minutes', NOW())
 	`, email, tokenHash)
@@ -29,7 +29,7 @@ func (r PostgresRepo) Create(ctx context.Context, email, tokenHash string) error
 func (r PostgresRepo) GetValid(ctx context.Context, tokenHash string) (*MagicToken, error) {
 	var magicToken MagicToken
 
-	err := r.db.QueryRow(ctx, `
+	err := r.pgsql.QueryRow(ctx, `
 		SELECT id, email, token_hash, expires_at
 		FROM magic_tokens
 		WHERE token_hash = $1 
@@ -49,7 +49,7 @@ func (r PostgresRepo) GetValid(ctx context.Context, tokenHash string) (*MagicTok
 }
 
 func (r PostgresRepo) MarkUsed(ctx context.Context, tokenHash string) error {
-	_, err := r.db.Exec(ctx, `
+	_, err := r.pgsql.Exec(ctx, `
 		UPDATE magic_tokens
 			SET used_at = NOW()
 			WHERE token_hash = $1
@@ -62,7 +62,7 @@ func (r PostgresRepo) MarkUsed(ctx context.Context, tokenHash string) error {
 }
 
 func (r PostgresRepo) MarkAllUsed(ctx context.Context, email string) error {
-	_, err := r.db.Exec(ctx, `
+	_, err := r.pgsql.Exec(ctx, `
 		UPDATE magic_tokens
 		SET used_at = NOW()
 		WHERE email = $1
