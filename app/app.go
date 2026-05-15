@@ -14,19 +14,19 @@ import (
 func Start() {
 	config.LoadEnv()
 
-	db, err := storage.InitDB()
+	pgsql, err := storage.InitPostgres()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cache, err := storage.InitCache()
+	redis, err := storage.InitRedis()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	queue.Init()
 
-	app := Bootstrap(db, cache)
+	app := Bootstrap(pgsql, redis)
 
 	router := setupRouter(app.Handlers, app.Middleware)
 
@@ -37,17 +37,17 @@ func Start() {
 func StartWorker() {
 	config.LoadEnv()
 
-	db, err := storage.InitDB()
+	pgsql, err := storage.InitPostgres()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cache, err := storage.InitCache()
+	redis, err := storage.InitRedis()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	app := Bootstrap(db, cache)
+	app := Bootstrap(pgsql, redis)
 	worker := app.Handlers.Worker
 
 	srv := asynq.NewServer(

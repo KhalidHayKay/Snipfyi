@@ -31,7 +31,6 @@ func (s *Service) Get(ctx context.Context, alias string) (*Stats, error) {
 	}
 
 	stats.BuildShortUrl()
-	log.Println(stats)
 	return &stats, nil
 }
 

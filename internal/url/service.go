@@ -16,6 +16,7 @@ func NewService(repo Repository) *Service {
 func (s *Service) Store(ctx context.Context, longUrl, alias string) (*Url, error) {
 	existingUrl, _ := s.repo.GetExact(ctx, longUrl, alias)
 	if existingUrl != nil {
+		existingUrl.BuildUrls()
 		return existingUrl, nil
 	}
 

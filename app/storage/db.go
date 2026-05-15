@@ -8,19 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitDB() (*pgxpool.Pool, error) {
+func InitPostgres() (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	db, err := pgxpool.New(ctx, config.Env.DbUrl)
+	pg, err := pgxpool.New(ctx, config.Env.DbUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Ping(ctx)
+	err = pg.Ping(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	return pg, nil
 }

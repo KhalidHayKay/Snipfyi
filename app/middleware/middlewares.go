@@ -7,7 +7,7 @@ import (
 	"smply/app/render"
 	"smply/config"
 	"smply/internal/apikey"
-	"smply/internal/limiter"
+	"smply/internal/ratelimiter"
 	"smply/internal/session"
 	"smply/utils"
 	"strings"
@@ -16,13 +16,13 @@ import (
 type Middleware struct {
 	apikeyService  *apikey.Service
 	sessionService *session.Service
-	limiterService *limiter.Service
+	limiterService *ratelimiter.Service
 }
 
 func NewMiddleware(
 	apikeyService *apikey.Service,
 	sessionService *session.Service,
-	limiterService *limiter.Service,
+	limiterService *ratelimiter.Service,
 ) *Middleware {
 	return &Middleware{
 		apikeyService:  apikeyService,
@@ -94,7 +94,7 @@ func (m *Middleware) AdminGuest(next http.Handler) http.Handler {
 	})
 }
 
-func (m *Middleware) RateLimit(conf *limiter.Config) func(http.Handler) http.Handler {
+func (m *Middleware) RateLimit(conf *ratelimiter.Config) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			key := r.Header.Get("X-API-Key")
