@@ -2,18 +2,17 @@ package apikey
 
 import (
 	"html/template"
-	"log"
 	"net/http"
-	"smply/internal/render"
+	"smply/app/render"
 
 	"github.com/jackc/pgx/v5"
 )
 
 type Handler struct {
-	service Service
+	service *Service
 }
 
-func NewHandler(service Service) *Handler {
+func NewHandler(service *Service) *Handler {
 	return &Handler{service}
 }
 
@@ -40,7 +39,6 @@ func (h *Handler) Request(w http.ResponseWriter, r *http.Request) {
 
 	err := h.service.RequestNew(r.Context(), email)
 	if err != nil {
-		log.Printf("Error creating magic token for %s: %v", email, err)
 		data.Error = "Unable to process your request. Please try again later."
 		render.Page(w, "api.html", data)
 		return
@@ -65,7 +63,6 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Println(err)
 		render.ErrorPage(w, http.StatusUnprocessableEntity, "Unable to create API key")
 		return
 	}

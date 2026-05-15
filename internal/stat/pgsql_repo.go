@@ -1,121 +1,123 @@
-package service
+package stat
 
 import (
 	"context"
-	"smply/internal/storage"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type TopLink struct {
-	Alias  string
-	Clicks int64
+type PostgresRepo struct {
+	db *pgxpool.Pool
 }
 
-type DailyStat struct {
-	Date   string
-	Clicks int64
+func NewPostresRepo(db *pgxpool.Pool) *PostgresRepo {
+	return &PostgresRepo{db: db}
 }
 
-type TopReferer struct {
-	Referer string
-	Clicks  int64
+func (r *PostgresRepo) Run(ctx context.Context, alias, referer, userAgent string, timestamp time.Time) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var id int
+	err = tx.QueryRow(ctx, `
+		UPDATE urls
+		SET visited = visited + 1, last_visited = $1
+		WHERE alias = $2
+		RETURNING id
+	`, timestamp, alias).Scan(&id)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO click_events (url_id, referer, user_agent, timestamp)
+		VALUES ($1, $2, $3, $4)
+	`, id, referer, userAgent, timestamp)
+	if err != nil {
+		return err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-type TopDevice struct {
-	Device string
-	Clicks int64
+func (r *PostgresRepo) Get(ctx context.Context, alias string) (Stats, error) {
+	var stats Stats
+
+	err := r.db.QueryRow(ctx,
+		`SELECT original, alias, visited, created, last_visited FROM urls WHERE alias = $1`,
+		alias).Scan(
+		&stats.Original,
+		&stats.Alias,
+		&stats.Visited,
+		&stats.Created,
+		&stats.LastVisited,
+	)
+	if err != nil {
+		return Stats{}, err
+	}
+
+	return stats, nil
 }
 
-type AdminStats struct {
-	// URLs
-	TotalUrls int64
-	UrlsToday int64
-
-	// Redirects (sum of urls.visited)
-	TotalRedirects int64
-
-	// Click events
-	TotalClicks        int64
-	ClicksToday        int64
-	ClicksThisWeek     int64
-	UniqueLinksClicked int64
-
-	// Peak activity
-	PeakDay        string
-	PeakHour       int
-	PeakHourClicks int64
-
-	// Click trend — last 7 days
-	DailyTrend []DailyStat
-
-	// Top links
-	TopLinks []TopLink
-
-	// Top referers
-	TopReferers []TopReferer
-
-	// Device breakdown
-	TopDevices []TopDevice
-
-	// API
-	TotalApiKeys  int64
-	ActiveApiKeys int64
-
-	// Magic tokens
-	TotalTokens int64
-	TokensToday int64
-}
-
-func GetAdminStats(ctx context.Context) (AdminStats, error) {
+func (r *PostgresRepo) GetAdmin(ctx context.Context) (AdminStats, error) {
 	var s AdminStats
 
 	// ── URLs ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM urls`,
 	).Scan(&s.TotalUrls); err != nil {
 		return s, err
 	}
 
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM urls WHERE DATE(created) = CURRENT_DATE`,
 	).Scan(&s.UrlsToday); err != nil {
 		return s, err
 	}
 
 	// ── Total redirects (from urls.visited) ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COALESCE(SUM(visited), 0) FROM urls`,
 	).Scan(&s.TotalRedirects); err != nil {
 		return s, err
 	}
 
 	// ── Click events: totals ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events`,
 	).Scan(&s.TotalClicks); err != nil {
 		return s, err
 	}
 
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events WHERE DATE(timestamp) = CURRENT_DATE`,
 	).Scan(&s.ClicksToday); err != nil {
 		return s, err
 	}
 
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM click_events WHERE timestamp >= NOW() - INTERVAL '7 days'`,
 	).Scan(&s.ClicksThisWeek); err != nil {
 		return s, err
 	}
 
 	// ── Unique links ever clicked ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(DISTINCT url_id) FROM click_events`,
 	).Scan(&s.UniqueLinksClicked); err != nil {
 		return s, err
 	}
 
 	// ── Peak day (soft error — no data yet is fine) ──
-	_ = storage.DB.QueryRow(ctx, `
+	_ = r.db.QueryRow(ctx, `
 		SELECT TO_CHAR(DATE(timestamp), 'Mon DD, YYYY'), COUNT(*)
 		FROM click_events
 		GROUP BY DATE(timestamp)
@@ -124,7 +126,7 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	`).Scan(&s.PeakDay, new(int64))
 
 	// ── Peak hour 0–23 ──
-	_ = storage.DB.QueryRow(ctx, `
+	_ = r.db.QueryRow(ctx, `
 		SELECT EXTRACT(HOUR FROM timestamp)::int, COUNT(*) AS cnt
 		FROM click_events
 		GROUP BY EXTRACT(HOUR FROM timestamp)
@@ -133,7 +135,7 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	`).Scan(&s.PeakHour, &s.PeakHourClicks)
 
 	// ── Daily trend — last 7 days (always 7 rows via generate_series) ──
-	trendRows, err := storage.DB.Query(ctx, `
+	trendRows, err := r.db.Query(ctx, `
 		SELECT TO_CHAR(gs::date, 'Mon DD') AS day, COALESCE(c.clicks, 0)
 		FROM generate_series(
 			(CURRENT_DATE - INTERVAL '6 days')::timestamp,
@@ -160,7 +162,7 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Top 5 links by clicks ──
-	topRows, err := storage.DB.Query(ctx, `
+	topRows, err := r.db.Query(ctx, `
 		SELECT u.alias, COUNT(c.id) AS clicks
 		FROM urls u
 		JOIN click_events c ON c.url_id = u.id
@@ -181,7 +183,7 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Top 5 referers ──
-	refRows, err := storage.DB.Query(ctx, `
+	refRows, err := r.db.Query(ctx, `
 		SELECT
 			CASE WHEN referer = '' OR referer IS NULL THEN 'Direct' ELSE referer END,
 			COUNT(*) AS clicks
@@ -203,7 +205,7 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Device breakdown (SQL-level UA bucketing) ──
-	devRows, err := storage.DB.Query(ctx, `
+	devRows, err := r.db.Query(ctx, `
 		SELECT
 			CASE
 				WHEN user_agent ILIKE '%mobile%'
@@ -232,13 +234,13 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── API keys ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM api_keys`,
 	).Scan(&s.TotalApiKeys); err != nil {
 		return s, err
 	}
 
-	if err := storage.DB.QueryRow(ctx, `
+	if err := r.db.QueryRow(ctx, `
 		SELECT COUNT(*) FROM api_keys
 		WHERE expires_at > NOW() AND last_used_at IS NULL
 	`).Scan(&s.ActiveApiKeys); err != nil {
@@ -246,13 +248,13 @@ func GetAdminStats(ctx context.Context) (AdminStats, error) {
 	}
 
 	// ── Magic tokens ──
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM magic_tokens`,
 	).Scan(&s.TotalTokens); err != nil {
 		return s, err
 	}
 
-	if err := storage.DB.QueryRow(ctx,
+	if err := r.db.QueryRow(ctx,
 		`SELECT COUNT(*) FROM magic_tokens WHERE DATE(created_at) = CURRENT_DATE`,
 	).Scan(&s.TokensToday); err != nil {
 		return s, err

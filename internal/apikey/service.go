@@ -10,10 +10,10 @@ import (
 
 type Service struct {
 	repo              Repository
-	magicTokenService magictoken.Service
+	magicTokenService *magictoken.Service
 }
 
-func NewService(repo Repository, magicTokenService magictoken.Service) *Service {
+func NewService(repo Repository, magicTokenService *magictoken.Service) *Service {
 	return &Service{
 		repo,
 		magicTokenService,
@@ -23,6 +23,7 @@ func NewService(repo Repository, magicTokenService magictoken.Service) *Service 
 func (s *Service) RequestNew(ctx context.Context, email string) error {
 	token, err := s.magicTokenService.Create(ctx, email)
 	if err != nil {
+		log.Printf("error creating magic token: %v", err)
 		return err
 	}
 
@@ -42,16 +43,19 @@ func (s *Service) Create(ctx context.Context, token string) (string, error) {
 
 	err = s.repo.RevokeAll(ctx, magicToken.Email)
 	if err != nil {
+		log.Printf("error revoking old API keys: %v", err)
 		return "", err
 	}
 
 	rawkey, err := utils.GenerateAPIKey()
 	if err != nil {
+		log.Printf("error generating API key: %v", err)
 		return "", err
 	}
 
 	_, err = s.repo.Create(ctx, magicToken.Email, rawkey)
 	if err != nil {
+		log.Printf("error creating API key: %v", err)
 		return "", err
 	}
 
@@ -63,6 +67,7 @@ func (s *Service) Validate(ctx context.Context, key string) (bool, error) {
 
 	apiKey, err := s.repo.FindByHash(ctx, keyHash)
 	if err != nil {
+		log.Printf("error finding API key: %v", err)
 		return false, err
 	}
 	if apiKey == nil {

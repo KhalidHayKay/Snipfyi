@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"log"
+	"smply/app/storage"
 	"smply/config"
-	"smply/internal/storage"
 )
 
 func main() {

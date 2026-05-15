@@ -10,21 +10,24 @@ import (
 
 var Cache *redis.Client
 
-func InitCache() error {
+func InitCache() (*redis.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	Cache = redis.NewClient(&redis.Options{
+	cache := redis.NewClient(&redis.Options{
 		Addr:     config.Env.Redis.Url,
 		Password: config.Env.Redis.Password,
 		DB:       0,
 	})
 
-	_, err := Cache.Ping(ctx).Result()
+	_, err := cache.Ping(ctx).Result()
 	if err != nil {
-		Cache.Close()
-		return err
+		cache.Close()
+		return nil, err
 	}
 
-	return nil
+	// Todo: remove global variable
+	Cache = cache
+
+	return cache, nil
 }

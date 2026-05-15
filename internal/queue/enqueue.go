@@ -22,8 +22,8 @@ func EnqueueAPIKeyMagicLinkEmail(ctx context.Context, email, token string) error
 	return err
 }
 
-func EnqueueStatsUpdate(ctx context.Context, urlAlias, referer, userAgent, ipAddress string, timestamp time.Time) error {
-	t, err := tasks.NewStatsUpdateTask(urlAlias, referer, userAgent, ipAddress, timestamp)
+func EnqueueStatsUpdate(ctx context.Context, urlAlias, referer, userAgent string, timestamp time.Time) error {
+	t, err := tasks.NewStatsUpdateTask(urlAlias, referer, userAgent, timestamp)
 	if err != nil {
 		return err
 	}

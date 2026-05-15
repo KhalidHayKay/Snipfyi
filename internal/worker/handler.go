@@ -4,13 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"smply/internal/service"
+	"smply/internal/mail"
+	"smply/internal/stat"
 	"smply/internal/tasks"
 
 	"github.com/hibiken/asynq"
 )
 
-func HandleAPIKeyMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
+type Handler struct {
+	statService *stat.Service
+	mailService *mail.Service
+}
+
+func NewHandler(statService *stat.Service, mailService *mail.Service) *Handler {
+	return &Handler{statService, mailService}
+}
+
+func (h *Handler) APIKeyMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
 	var payload tasks.APIKeyMagicLinkEmailPayload
 	err := json.Unmarshal(task.Payload(), &payload)
 	if err != nil {
@@ -18,10 +28,10 @@ func HandleAPIKeyMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
 		return err
 	}
 
-	return service.SendAPIKeyMagicLinkEmail(payload.Email, payload.Token)
+	return h.mailService.SendAPIKeyMagicLink(payload.Email, payload.Token)
 }
 
-func HandleStatsUpdate(ctx context.Context, task *asynq.Task) error {
+func (h *Handler) StatsUpdate(ctx context.Context, task *asynq.Task) error {
 	var payload tasks.StatsUpdatePayload
 	err := json.Unmarshal(task.Payload(), &payload)
 	if err != nil {
@@ -29,16 +39,15 @@ func HandleStatsUpdate(ctx context.Context, task *asynq.Task) error {
 		return err
 	}
 
-	return service.RunStats(ctx,
+	return h.statService.Run(ctx,
 		payload.UrlAlias,
 		payload.Referer,
 		payload.UserAgent,
-		payload.IpAddress,
 		payload.Timestamp,
 	)
 }
 
-func HandleAdminLoginMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
+func (h *Handler) AdminLoginMagicLinkEmail(ctx context.Context, task *asynq.Task) error {
 	var payload tasks.AdminLoginMagicLinkEmailPayload
 	err := json.Unmarshal(task.Payload(), &payload)
 	if err != nil {
@@ -46,5 +55,5 @@ func HandleAdminLoginMagicLinkEmail(ctx context.Context, task *asynq.Task) error
 		return err
 	}
 
-	return service.SendAdminLoginMagicLinkEmail(payload.Email, payload.Token)
+	return h.mailService.SendAdminLoginMagicLink(payload.Email, payload.Token)
 }

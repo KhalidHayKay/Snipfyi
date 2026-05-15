@@ -1,23 +1,24 @@
-package service
+package mail
 
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"log"
 	"smply/config"
-	"text/template"
 
 	"gopkg.in/gomail.v2"
 )
 
-func SendAPIKeyMagicLinkEmail(email string, token string) error {
-	dailer := gomail.NewDialer(
-		config.Env.Mailer.Host,
-		config.Env.Mailer.Port,
-		config.Env.Mailer.User,
-		config.Env.Mailer.Pass,
-	)
+type Service struct {
+	dailer *gomail.Dialer
+}
 
+func NewService(dailer *gomail.Dialer) *Service {
+	return &Service{dailer: dailer}
+}
+
+func (s *Service) SendAPIKeyMagicLink(email string, token string) error {
 	t, err := template.ParseFiles("templates/emails/magic-link.html")
 	if err != nil {
 		log.Printf("Failed to parse email template: %v", err)
@@ -44,7 +45,7 @@ func SendAPIKeyMagicLinkEmail(email string, token string) error {
 	message.SetHeader("Subject", "Your Magic Link")
 	message.SetBody("text/html", body.String())
 
-	if err := dailer.DialAndSend(message); err != nil {
+	if err := s.dailer.DialAndSend(message); err != nil {
 		log.Printf("Failed to send magic link email to %s: %v", email, err)
 		return err
 	}
@@ -53,14 +54,7 @@ func SendAPIKeyMagicLinkEmail(email string, token string) error {
 	return nil
 }
 
-func SendAdminLoginMagicLinkEmail(email string, token string) error {
-	dailer := gomail.NewDialer(
-		config.Env.Mailer.Host,
-		config.Env.Mailer.Port,
-		config.Env.Mailer.User,
-		config.Env.Mailer.Pass,
-	)
-
+func (s *Service) SendAdminLoginMagicLink(email string, token string) error {
 	t, err := template.ParseFiles("templates/emails/admin-magic-link.html")
 	if err != nil {
 		log.Printf("Failed to parse email template: %v", err)
@@ -86,7 +80,7 @@ func SendAdminLoginMagicLinkEmail(email string, token string) error {
 	message.SetHeader("Subject", "Your Admin Magic Link")
 	message.SetBody("text/html", body.String())
 
-	if err := dailer.DialAndSend(message); err != nil {
+	if err := s.dailer.DialAndSend(message); err != nil {
 		log.Printf("Failed to send admin magic link email to %s: %v", email, err)
 		return err
 	}
