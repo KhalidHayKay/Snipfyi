@@ -74,5 +74,9 @@ func (s *Service) Validate(ctx context.Context, key string) (bool, error) {
 		return false, nil
 	}
 
+	if apiKey.RevokedAt != nil {
+		return false, nil
+	}
+
 	return true, nil
 }
